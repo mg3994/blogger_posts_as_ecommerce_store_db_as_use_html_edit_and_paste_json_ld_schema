@@ -378,7 +378,7 @@
               <h1 id='p-title'><data:post.title/></h1>
               <div id='p-brand' style='font-weight: 600; color: #666; margin-top: -10px;'></div>
               <div class='product-price' id='p-price'>--</div>
-              <p id='p-description'><data:post.body/></p>
+              <div id='p-description'><!-- Description injected by JS --></div>
 
               <div id='variant-selectors'>
                 <!-- Variant selectors injected by JS -->
