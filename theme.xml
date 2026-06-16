@@ -172,6 +172,7 @@
       font-weight: 600;
     }
     .v-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .v-btn:disabled { opacity: 0.3; cursor: not-allowed; border-style: dashed; }
     .v-color { width: 35px; height: 35px; padding: 0; border-radius: 50%; }
 
     /* Seller & GEO */
@@ -210,7 +211,22 @@
       border-top: 4px solid var(--accent);
     }
 
-    .price { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .thumb.active { border-color: var(--accent); }
+
+    .price { font-size: 1.5rem; font-weight: 800; color: var(--accent); transition: filter 0.3s; }
+    .price.blurry { filter: blur(4px); opacity: 0.5; pointer-events: none; }
+    .stock-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-left: 10px; }
+    .in-stock { background: #e8f5e9; color: #2e7d32; }
+    .out-stock { background: #ffebee; color: #c62828; }
     .section-title { font-size: 1.3rem; margin: 30px 0 15px; border-left: 5px solid var(--accent); padding-left: 15px; }
     .hidden { display: none !important; }
 
@@ -222,36 +238,41 @@
   ]]></b:skin>
 </head>
 <body>
-  <nav class='nav'>
-    <div class='nav-inner'>
-      <a class='brand' expr:href='data:blog.homepageUrl'><data:blog.title/></a>
-    </div>
-  </nav>
+  <b:section id='header-section' showaddelement='no'>
+    <b:widget id='Header1' locked='true' title='Header' type='Header'>
+      <b:includable id='main'>
+        <nav class='nav'>
+          <div class='nav-inner'>
+            <a class='brand' expr:href='data:blog.homepageUrl'><data:blog.title/></a>
+          </div>
+        </nav>
+      </b:includable>
+    </b:widget>
+  </b:section>
 
-  <b:if cond='data:view.isMultipleItems'>
-    <div class='cat-bar'>
-      <div class='cat-inner'>
-        <a class='cat-link' expr:href='data:blog.homepageUrl'>All</a>
-        <!-- This requires a Label widget to be present or we can hardcode common ones -->
-        <b:section id='category-section' showaddelement='no'>
-          <b:widget id='Label1' locked='true' title='Categories' type='Label'>
-            <b:includable id='main'>
+  <b:section id='category-section' showaddelement='no'>
+    <b:widget id='Label1' locked='true' title='Categories' type='Label'>
+      <b:includable id='main'>
+        <b:if cond='data:view.isMultipleItems'>
+          <div class='cat-bar'>
+            <div class='cat-inner'>
+              <a class='cat-link' expr:href='data:blog.homepageUrl'>All</a>
               <b:loop values='data:labels' var='label'>
                 <a class='cat-link' expr:href='data:label.url'><data:label.name/></a>
               </b:loop>
-            </b:includable>
-          </b:widget>
-        </b:section>
-      </div>
-    </div>
-  </b:if>
+            </div>
+          </div>
+        </b:if>
+      </b:includable>
+    </b:widget>
+  </b:section>
 
   <div class='container'>
     <b:section id='main-section' showaddelement='yes'>
       <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
         <b:includable id='postCard' var='post'>
           <a class='card' expr:href='data:post.url' expr:id='&quot;card-&quot; + data:post.id'>
-            <img class='card-img' expr:src='data:post.featuredImage ?: &quot;https://via.placeholder.com/400x300?text=Antinna&quot;'/>
+                  <img class='card-img' expr:data-src='data:post.featuredImage ?: &quot;https://via.placeholder.com/400x300?text=Antinna&quot;' loading='lazy' src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'/>
             <div class='card-body'>
               <div class='card-badge'>Loading...</div>
               <h3 class='card-title'><data:post.title/></h3>
@@ -318,6 +339,7 @@
                           <button class='carousel-btn' onclick='prevSlide()' style='left:10px;'>&#10094;</button>
                           <button class='carousel-btn' onclick='nextSlide()' style='right:10px;'>&#10095;</button>
                        </div>
+                       <div class='h-scroll' id='thumbnail-row' style='margin-top:10px; gap:10px;'></div>
                     </div>
 
                     <div class='details-container hidden' id='details-section'>
@@ -326,6 +348,11 @@
                        <p id='p-desc' style='color:#666;'></p>
 
                        <div class='variants' id='p-variants'></div>
+
+                       <div id='p-specs' style='margin-top:20px; display:none;'>
+                          <h4 style='margin:0 0 10px; border-bottom:1px solid #eee; padding-bottom:5px;'>Technical Specifications</h4>
+                          <div id='specs-list' style='font-size:0.9rem;'></div>
+                       </div>
 
                        <div class='seller-box' id='p-seller'>
                           <h4 style='margin:0 0 10px;'>Seller Details</h4>
@@ -371,6 +398,21 @@
     function initGrid() {
       const cards = document.querySelectorAll('.card');
       if (cards.length === 0) return;
+
+      // Lazy load observer
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+             const img = e.target.querySelector('.card-img');
+             if (img && img.dataset.src) {
+                img.src = img.dataset.src;
+                delete img.dataset.src;
+             }
+             observer.unobserve(e.target);
+          }
+        });
+      });
+      cards.forEach(c => observer.observe(c));
 
       // Primary source: Attempt to use the full feed to bypass snippet limitations
       const path = window.location.pathname;
@@ -431,6 +473,17 @@
 
         if (first.offers) {
           price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
+
+          const isOut = first.offers.availability === 'https://schema.org/OutOfStock';
+          if (isOut) {
+            price.classList.add('blurry');
+            const outB = document.createElement('div');
+            outB.className = 'card-badge out-stock';
+            outB.style.marginLeft = '5px';
+            outB.textContent = 'Out of Stock';
+            badge.after(outB);
+          }
+
           const seller = first.offers.seller;
           if (seller && (seller.knowsAbout || seller.hasOfferCatalog)) {
             const sBadge = document.createElement('div');
@@ -449,6 +502,17 @@
         badge.textContent = 'Service';
         badge.style.background = '#3498db';
         badge.style.color = '#fff';
+
+        // Check if standalone service provider also has general offerings
+        if (data.knowsAbout || (data.hasOfferCatalog && data.hasOfferCatalog.itemListElement && data.hasOfferCatalog.itemListElement.length > 1)) {
+          const sBadge = document.createElement('div');
+          sBadge.className = 'card-badge';
+          sBadge.style.background = '#27ae60';
+          sBadge.style.color = '#fff';
+          sBadge.style.marginLeft = '5px';
+          sBadge.textContent = '(Multi-Service)';
+          badge.after(sBadge);
+        }
 
         if (data.hasOfferCatalog && data.hasOfferCatalog.itemListElement) {
           const off = data.hasOfferCatalog.itemListElement[0];
@@ -561,6 +625,9 @@
           values.forEach(val => {
             const btn = document.createElement('button');
             btn.className = 'v-btn';
+            btn.dataset.attr = attr;
+            btn.dataset.val = val;
+
             if (attr.toLowerCase() === 'color') {
               btn.classList.add('v-color');
               btn.style.backgroundColor = val;
@@ -571,6 +638,7 @@
             btn.onclick = () => {
               state.selected[attr] = val;
               updateProductView();
+              checkAvailability();
             };
             opts.appendChild(btn);
           });
@@ -580,6 +648,39 @@
         });
       }
       updateProductView();
+      checkAvailability();
+    }
+
+    function checkAvailability() {
+      const p = state.product;
+      const allBtns = document.querySelectorAll('.v-btn[data-attr]');
+
+      allBtns.forEach(btn => {
+        const attr = btn.dataset.attr;
+        const val = btn.dataset.val;
+
+        // Temporarily simulate selecting this button
+        const testSelected = { ...state.selected, [attr]: val };
+
+        // Check if any variant matches this simulated selection AND is in stock
+        const matchingVariant = p.hasVariant.find(v =>
+          Object.entries(testSelected).every(([k, vVal]) => !v[k] || v[k] === vVal)
+        );
+
+        const possible = !!matchingVariant;
+        const outOfStock = matchingVariant && matchingVariant.offers && matchingVariant.offers.availability === 'https://schema.org/OutOfStock';
+
+        btn.disabled = !possible;
+        btn.style.opacity = outOfStock ? '0.5' : (possible ? '1' : '0.3');
+        if (outOfStock) btn.title = val + ' (Out of Stock)';
+      });
+    }
+
+    function formatValue(v) {
+      if (!v) return '';
+      if (typeof v === 'string') return v;
+      if (v['@type'] === 'QuantitativeValue') return `${v.value} ${v.unitCode || v.unitText || ''}`;
+      return v.value || '';
     }
 
     function updateProductView() {
@@ -591,10 +692,55 @@
       ) || p.hasVariant[0];
 
       if (variant.offers) {
-        document.getElementById('p-price').textContent = (variant.offers.priceCurrency || '') + ' ' + (variant.offers.price || '');
+        const priceEl = document.getElementById('p-price');
+        priceEl.textContent = (variant.offers.priceCurrency || '') + ' ' + (variant.offers.price || '');
+
+        // Stock Logic
+        const isOut = variant.offers.availability === 'https://schema.org/OutOfStock';
+        priceEl.classList.toggle('blurry', isOut);
+
+        // Add/Update Stock Badge
+        let badge = document.getElementById('stock-indicator');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.id = 'stock-indicator';
+          badge.className = 'stock-badge';
+          priceEl.after(badge);
+        }
+        badge.textContent = isOut ? 'Out of Stock' : 'In Stock';
+        badge.className = 'stock-badge ' + (isOut ? 'out-stock' : 'in-stock');
+
         renderSeller(variant.offers.seller);
       }
       renderCarousel(variant.image || p.image);
+
+      // Render Specifications
+      const specs = document.getElementById('p-specs');
+      const list = document.getElementById('specs-list');
+      const fields = {
+        'Model': variant.model || p.model,
+        'Material': variant.material || p.material,
+        'Weight': formatValue(variant.weight || p.weight),
+        'Height': formatValue(variant.height || p.height),
+        'Width': formatValue(variant.width || p.width),
+        'Depth': formatValue(variant.depth || p.depth),
+        'Color': variant.color || p.color
+      };
+
+      let specsHtml = '';
+      for (let [label, val] of Object.entries(fields)) {
+        if (val) specsHtml += `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #f0f0f0;">
+                                  <span style="color:#888;">${label}</span>
+                                  <span style="font-weight:600;">${val}</span>
+                               </div>`;
+      }
+
+      if (specsHtml) {
+        specs.style.display = 'block';
+        list.innerHTML = specsHtml;
+      } else {
+        specs.style.display = 'none';
+      }
 
       // Highlight buttons
       document.querySelectorAll('.v-btn').forEach(btn => {
@@ -647,32 +793,61 @@
 
     function renderCarousel(images) {
       const inner = document.getElementById('carousel-inner');
+      const thumbRow = document.getElementById('thumbnail-row');
+      if (!inner) return;
+
       inner.innerHTML = '';
+      if (thumbRow) thumbRow.innerHTML = '';
+
       state.slide = 0;
       inner.style.transform = `translateX(0)`;
 
       let list = Array.isArray(images) ? images : [images];
-      list.forEach(src => {
+      list = list.filter(Boolean);
+
+      list.forEach((src, idx) => {
+        const imgUrl = src.url || src;
+
+        // Main slide
         const div = document.createElement('div');
         div.className = 'carousel-item';
-        div.innerHTML = `<img src="${src.url || src}"/>`;
+        div.innerHTML = `<img src="${imgUrl}"/>`;
         inner.appendChild(div);
+
+        // Thumbnail
+        if (thumbRow && list.length > 1) {
+          const thumb = document.createElement('img');
+          thumb.className = 'thumb' + (idx === 0 ? ' active' : '');
+          thumb.src = imgUrl;
+          thumb.onclick = () => goToSlide(idx);
+          thumbRow.appendChild(thumb);
+        }
       });
     }
+
+    window.goToSlide = (idx) => {
+      const inner = document.getElementById('carousel-inner');
+      const thumbs = document.querySelectorAll('.thumb');
+      const count = document.querySelectorAll('.carousel-item').length;
+      if (idx < 0) idx = count - 1;
+      if (idx >= count) idx = 0;
+
+      state.slide = idx;
+      if (inner) inner.style.transform = `translateX(-${idx * 100}%)`;
+      thumbs.forEach((t, i) => t.classList.toggle('active', i === idx));
+    };
 
     window.nextSlide = () => {
       const count = document.querySelectorAll('.carousel-item').length;
       if (count > 1) {
-        state.slide = (state.slide + 1) % count;
-        document.getElementById('carousel-inner').style.transform = `translateX(-${state.slide * 100}%)`;
+        goToSlide(state.slide + 1);
       }
     };
 
     window.prevSlide = () => {
       const count = document.querySelectorAll('.carousel-item').length;
       if (count > 1) {
-        state.slide = (state.slide - 1 + count) % count;
-        document.getElementById('carousel-inner').style.transform = `translateX(-${state.slide * 100}%)`;
+        goToSlide(state.slide - 1);
       }
     };
 
@@ -682,7 +857,7 @@
       info.innerHTML = `
         <strong>${seller.name}</strong><br/>
         ${seller.telephone || ''}<br/>
-        ${seller.address ? seller.address.addressLocality : ''}
+        ${seller.address ? (seller.address.addressLocality || '') : ''}
       `;
 
       if (seller.geo) {
@@ -694,8 +869,11 @@
 
       // Handle "Other Services"
       let services = [];
-      if (seller.knowsAbout) services = Array.isArray(seller.knowsAbout) ? seller.knowsAbout : [seller.knowsAbout];
-      else if (seller.hasOfferCatalog) services = seller.hasOfferCatalog.itemListElement || [];
+      if (seller.hasOfferCatalog && seller.hasOfferCatalog.itemListElement) {
+        services = seller.hasOfferCatalog.itemListElement;
+      } else if (seller.knowsAbout) {
+        services = Array.isArray(seller.knowsAbout) ? seller.knowsAbout : [seller.knowsAbout];
+      }
 
       const otherSection = document.getElementById('other-services');
       const list = document.getElementById('other-services-list');
@@ -704,11 +882,21 @@
         otherSection.style.display = 'block';
         list.innerHTML = '';
         services.forEach(ser => {
-          const name = typeof ser === 'string' ? ser : (ser.name || ser.itemOffered?.name);
-          const div = document.createElement('div');
-          div.className = 'h-card';
-          div.innerHTML = `<strong>${name}</strong>`;
-          list.appendChild(div);
+          let name = '';
+          let price = '';
+
+          if (typeof ser === 'string') name = ser;
+          else {
+            name = ser.name || (ser.itemOffered ? ser.itemOffered.name : '');
+            if (ser.price) price = `${ser.priceCurrency || ''} ${ser.price}`;
+          }
+
+          if (name) {
+            const div = document.createElement('div');
+            div.className = 'h-card';
+            div.innerHTML = `<strong>${name}</strong>${price ? `<br/><span style="color:var(--accent); font-weight:700;">${price}</span>` : ''}`;
+            list.appendChild(div);
+          }
         });
       } else {
         otherSection.style.display = 'none';
