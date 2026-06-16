@@ -69,6 +69,10 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
+    .service-card {
+      border-top: 4px solid #3498db;
+    }
+
     .product-card {
       background: var(--card-bg);
       border-radius: var(--border-radius);
@@ -105,8 +109,19 @@
     .product-title {
       font-size: 1.1rem;
       font-weight: 600;
-      margin: 0 0 10px 0;
+      margin: 0 0 5px 0;
       color: var(--primary-color);
+    }
+
+    .card-badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      background: var(--accent-color);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      align-self: flex-start;
+      margin-bottom: 10px;
     }
 
     /* Single Product View */
@@ -282,7 +297,11 @@
           <b:if cond='data:view.isMultipleItems'>
             <div class='product-grid'>
               <b:loop values='data:posts' var='post'>
-                <b:include data='post' name='postCard'/>
+                <b:if cond='data:post.labels any (l => l.name == "Service")'>
+                  <b:include data='post' name='serviceCard'/>
+                <b:else/>
+                  <b:include data='post' name='productCard'/>
+                </b:if>
               </b:loop>
             </div>
             <b:include name='nextprev'/>
@@ -293,7 +312,7 @@
           </b:if>
         </b:includable>
 
-        <b:includable id='postCard' var='post'>
+        <b:includable id='productCard' var='post'>
           <div class='product-card'>
             <a expr:href='data:post.url'>
               <div class='product-image-wrap'>
@@ -306,9 +325,27 @@
             </a>
             <div class='product-info'>
               <h2 class='product-title'><a expr:href='data:post.url' style='text-decoration:none; color:inherit;'><data:post.title/></a></h2>
-              <!-- Pricing and variants will be rendered by JS if possible,
-                   but for grid we'll show a "View Details" button -->
+              <div class='card-badge'>Product</div>
               <a class='option' expr:href='data:post.url' style='text-align:center; margin-top:auto; text-decoration:none;'>View Details</a>
+            </div>
+          </div>
+        </b:includable>
+
+        <b:includable id='serviceCard' var='post'>
+          <div class='product-card service-card'>
+            <a expr:href='data:post.url'>
+              <div class='product-image-wrap'>
+                <b:if cond='data:post.featuredImage'>
+                  <img class='product-image' expr:src='data:post.featuredImage' expr:title='data:post.title'/>
+                <b:else/>
+                  <img class='product-image' src='https://via.placeholder.com/400x300?text=Service'/>
+                </b:if>
+              </div>
+            </a>
+            <div class='product-info'>
+              <h2 class='product-title'><a expr:href='data:post.url' style='text-decoration:none; color:inherit;'><data:post.title/></a></h2>
+              <div class='card-badge' style='background:#3498db;'>Service</div>
+              <a class='option' expr:href='data:post.url' style='text-align:center; margin-top:auto; text-decoration:none; border-color:#3498db; color:#3498db;'>Book Now</a>
             </div>
           </div>
         </b:includable>
@@ -370,12 +407,16 @@
 
         <b:includable id='featuredSection'>
           <b:if cond='data:posts any (p => p.labels any (l => l.name == "featured" or l.name == "popular"))'>
-            <h2 class='section-title'>Featured Products</h2>
+            <h2 class='section-title'>Featured Items</h2>
             <div class='featured-container'>
               <div class='product-grid'>
                 <b:loop values='data:posts' var='post'>
                   <b:if cond='data:post.labels any (l => l.name == "featured" or l.name == "popular")'>
-                    <b:include data='post' name='postCard'/>
+                    <b:if cond='data:post.labels any (l => l.name == "Service")'>
+                      <b:include data='post' name='serviceCard'/>
+                    <b:else/>
+                      <b:include data='post' name='productCard'/>
+                    </b:if>
                   </b:if>
                 </b:loop>
               </div>
@@ -404,11 +445,11 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       if (document.getElementById('json-ld-source')) {
-        initProductPage();
+        initPage();
       }
     });
 
-    function initProductPage() {
+    function initPage() {
       const source = document.getElementById('json-ld-source');
       if (!source) return;
 
@@ -421,6 +462,8 @@
           const data = JSON.parse(text);
           if (data['@type'] === 'ProductGroup') {
             productData = data;
+          } else if (data['@type'] === 'Service') {
+            initServicePage(data);
           }
         } catch (e) {
           console.error("Failed to parse JSON-LD. Please check if the JSON is valid.", e);
@@ -435,9 +478,58 @@
         renderProductInfo();
         renderSelectors();
         updateDisplay();
-      } else {
-        console.warn("No ProductGroup found in JSON-LD");
       }
+    }
+
+    function initServicePage(data) {
+      document.getElementById('p-title').textContent = data.name;
+      document.getElementById('p-description').textContent = data.description;
+
+      if (data.provider) {
+        renderSeller(data.provider);
+      }
+
+      // Handle Service Area
+      if (data.areaServed) {
+        const area = typeof data.areaServed === 'string' ? data.areaServed : (data.areaServed.name || data.areaServed['@type']);
+        const areaBadge = document.createElement('div');
+        areaBadge.className = 'services-tag';
+        areaBadge.style.background = '#e8f5e9';
+        areaBadge.style.color = '#2e7d32';
+        areaBadge.innerHTML = '<strong>Area Served:</strong> ' + area;
+        document.getElementById('p-description').after(areaBadge);
+      }
+
+      // Handle Offers Catalog
+      if (data.hasOfferCatalog) {
+        const selectorContainer = document.getElementById('variant-selectors');
+        selectorContainer.innerHTML = '<h3>Service Options</h3>';
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'variant-options';
+
+        data.hasOfferCatalog.itemListElement.forEach(offer => {
+          const btn = document.createElement('button');
+          btn.className = 'option';
+          btn.innerHTML = `${offer.itemOffered.name} - <strong>${offer.priceCurrency} ${offer.price}</strong>`;
+          btn.onclick = () => {
+             document.getElementById('p-price').textContent = `${offer.priceCurrency} ${offer.price}`;
+             document.querySelectorAll('.variant-section .option').forEach(o => o.classList.remove('selected'));
+             btn.classList.add('selected');
+          };
+          optionsDiv.appendChild(btn);
+        });
+
+        const section = document.createElement('div');
+        section.className = 'variant-section';
+        section.appendChild(optionsDiv);
+        selectorContainer.appendChild(section);
+
+        // Select first by default
+        optionsDiv.firstChild.click();
+      }
+
+      // Handle Carousel if provider has photos or something (optional)
+      if (data.image) renderCarousel(data.image);
     }
 
     function renderProductInfo() {
@@ -516,7 +608,7 @@
 
       // Update selectedVariants to match the actual found variant
       productData.variesBy.forEach(attrUrl => {
-        const attr = attrUrl.split('/').pop();
+        const attr = attrUrl.split(/[\/#]/).pop();
         if (variant[attr]) selectedVariants[attr] = variant[attr];
       });
 
