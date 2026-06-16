@@ -236,7 +236,7 @@
         <b:section id='category-section' showaddelement='no'>
           <b:widget id='Label1' locked='true' title='Categories' type='Label'>
             <b:includable id='main'>
-              <b:loop values='data:results' var='label'>
+              <b:loop values='data:labels' var='label'>
                 <a class='cat-link' expr:href='data:label.url'><data:label.name/></a>
               </b:loop>
             </b:includable>
@@ -372,62 +372,92 @@
       const cards = document.querySelectorAll('.card');
       if (cards.length === 0) return;
 
-      cards.forEach(card => {
-        const raw = card.querySelector('.grid-data');
-        if (!raw) return;
-        const data = parseJSON(raw.textContent);
+      // Primary source: Attempt to use the full feed to bypass snippet limitations
+      const path = window.location.pathname;
+      let feedUrl = '/feeds/posts/default?alt=json&max-results=25';
+      if (path.includes('/search/label/')) {
+        const label = path.split('/').pop().split('?')[0];
+        feedUrl = `/feeds/posts/default/-/${label}?alt=json&max-results=25`;
+      }
 
-        const badge = card.querySelector('.card-badge');
-        if (!data) {
-          badge.textContent = 'JSON Error';
-          badge.style.background = '#e74c3c';
-          badge.style.color = '#fff';
-          return;
+      fetch(feedUrl)
+        .then(res => res.json())
+        .then(feedData => {
+           const entries = feedData.feed.entry || [];
+           cards.forEach(card => {
+             const cardUrl = card.href.split('?')[0].split('#')[0];
+             const entry = entries.find(e => e.link.some(l => l.rel === 'alternate' && l.href.includes(cardUrl)));
+
+             if (entry) {
+               const content = entry.content.$t;
+               const data = parseJSON(content);
+               if (data) renderCardData(card, data);
+             } else {
+               // Fallback to hidden grid-data if feed fetch fails or entry not found
+               const raw = card.querySelector('.grid-data');
+               if (raw) {
+                 const data = parseJSON(raw.textContent);
+                 if (data) renderCardData(card, data);
+               }
+             }
+           });
+        })
+        .catch(() => {
+           // Direct fallback on fetch error
+           cards.forEach(card => {
+             const raw = card.querySelector('.grid-data');
+             if (raw) {
+               const data = parseJSON(raw.textContent);
+               if (data) renderCardData(card, data);
+             }
+           });
+        });
+    }
+
+    function renderCardData(card, data) {
+      const badge = card.querySelector('.card-badge');
+      const price = card.querySelector('.card-price');
+      const img = card.querySelector('.card-img');
+
+      // Reset badges
+      badge.textContent = '';
+      badge.className = 'card-badge';
+      badge.style.display = 'inline-block';
+
+      if (data['@type'] === 'ProductGroup' || data['@type'] === 'Product') {
+        badge.textContent = 'Product';
+        const variants = data.hasVariant || [data];
+        const first = variants[0];
+
+        if (first.offers) {
+          price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
+          const seller = first.offers.seller;
+          if (seller && (seller.knowsAbout || seller.hasOfferCatalog)) {
+            const sBadge = document.createElement('div');
+            sBadge.className = 'card-badge';
+            sBadge.style.background = '#3498db';
+            sBadge.style.color = '#fff';
+            sBadge.style.marginLeft = '5px';
+            sBadge.textContent = '(Also provide Services)';
+            badge.after(sBadge);
+          }
         }
+        const imageSource = first.image || data.image || (data.hasVariant && data.hasVariant.find(v => v.image)?.image);
+        if (imageSource) img.src = Array.isArray(imageSource) ? imageSource[0] : (imageSource.url || imageSource);
 
-        const price = card.querySelector('.card-price');
-        const img = card.querySelector('.card-img');
+      } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service') {
+        badge.textContent = 'Service';
+        badge.style.background = '#3498db';
+        badge.style.color = '#fff';
 
-        if (data['@type'] === 'ProductGroup') {
-          badge.textContent = 'Product';
-          const variants = data.hasVariant || [];
-          if (variants.length > 0) {
-            const first = variants[0];
-            if (first.offers) {
-              price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
-
-              // Dual-Type Detection: Check if seller offers services
-              const seller = first.offers.seller;
-              if (seller && (seller.knowsAbout || seller.hasOfferCatalog)) {
-                const sBadge = document.createElement('div');
-                sBadge.className = 'card-badge';
-                sBadge.style.background = '#3498db';
-                sBadge.style.color = '#fff';
-                sBadge.style.marginLeft = '5px';
-                sBadge.textContent = 'Service';
-                badge.after(sBadge);
-              }
-            }
-            const imageSource = first.image || data.image || (variants.find(v => v.image)?.image);
-            if (imageSource) img.src = Array.isArray(imageSource) ? imageSource[0] : (imageSource.url || imageSource);
-          }
-        } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service' || data['@type'] === 'Product') {
-          badge.textContent = data['@type'] === 'Product' ? 'Product' : 'Service';
-          if (data['@type'] !== 'Product') {
-            badge.style.background = '#3498db';
-            badge.style.color = '#fff';
-          }
-
-          if (data.hasOfferCatalog && data.hasOfferCatalog.itemListElement) {
-            const off = data.hasOfferCatalog.itemListElement[0];
-            price.textContent = 'Starts ' + (off.priceCurrency || '') + ' ' + (off.price || '');
-          } else if (data.offers) {
-            price.textContent = (data.offers.priceCurrency || '') + ' ' + (data.offers.price || '');
-          }
-
-          if (data.image) img.src = Array.isArray(data.image) ? data.image[0] : (data.image.url || data.image);
+        if (data.hasOfferCatalog && data.hasOfferCatalog.itemListElement) {
+          const off = data.hasOfferCatalog.itemListElement[0];
+          price.textContent = 'Starts ' + (off.priceCurrency || '') + ' ' + (off.price || '');
+        } else if (data.offers) {
+          price.textContent = (data.offers.priceCurrency || '') + ' ' + (data.offers.price || '');
         }
-      });
+        if (data.image) img.src = Array.isArray(data.image) ? data.image[0] : (data.image.url || data.image);
+      }
     }
 
     function initItem() {
