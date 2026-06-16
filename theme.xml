@@ -4,857 +4,550 @@
 <head>
   <meta content='width=device-width, initial-scale=1' name='viewport'/>
   <title><data:blog.pageTitle/></title>
-
   <b:skin><![CDATA[
-    /* Variables */
+    /* Fresh Start CSS */
     :root {
-      --primary-color: #333;
-      --accent-color: #e67e22;
-      --bg-color: #f4f4f4;
-      --card-bg: #fff;
-      --text-color: #333;
-      --border-radius: 8px;
+      --primary: #2c3e50;
+      --accent: #e67e22;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #333333;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
       margin: 0;
-      padding: 0;
-      color: var(--text-color);
+      line-height: 1.5;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 20px;
     }
 
-    /* Header */
-    header {
+    /* Navbar */
+    .nav {
       background: #fff;
-      padding: 1rem 0;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      padding: 15px 0;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .header-content {
+    .nav-inner {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 20px;
     }
-
-    /* Product Grid */
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .section-title {
+    .brand {
       font-size: 1.5rem;
-      margin: 30px 0 20px 0;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--accent-color);
-      display: inline-block;
-    }
-
-    .featured-container {
-      background: #fff;
-      padding: 20px;
-      border-radius: var(--border-radius);
-      margin-bottom: 40px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-
-    .service-card {
-      border-top: 4px solid #3498db;
-    }
-
-    .product-card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .product-image-wrap {
-      width: 100%;
-      height: 250px;
-      overflow: hidden;
-    }
-
-    .product-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .product-info {
-      padding: 15px;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .product-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 0 0 5px 0;
-      color: var(--primary-color);
-    }
-
-    .card-badge {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      background: var(--accent-color);
-      color: #fff;
-      padding: 2px 6px;
-      border-radius: 4px;
-      align-self: flex-start;
-      margin-bottom: 10px;
-    }
-
-    /* Single Product View */
-    .product-view {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-      background: #fff;
-      padding: 30px;
-      border-radius: var(--border-radius);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    @media (min-width: 768px) {
-      .product-view {
-        flex-direction: row;
-      }
-    }
-
-    .product-carousel-container {
-      flex: 1;
-      max-width: 100%;
-    }
-
-    .product-carousel {
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--border-radius);
-      background: #eee;
-      aspect-ratio: 4/3;
-    }
-
-    .carousel-inner {
-      display: flex;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .carousel-item {
-      min-width: 100%;
-    }
-
-    .carousel-item img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-    }
-
-    .carousel-controls {
-      position: absolute;
-      top: 50%;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-
-    .carousel-btn {
-      background: rgba(255,255,255,0.7);
-      color: #333;
-      border: none;
-      padding: 12px;
-      cursor: pointer;
-      pointer-events: auto;
-      border-radius: 50%;
-      margin: 0 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .product-details {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .product-price {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--accent-color);
-    }
-
-    .variant-section {
-      margin: 10px 0;
-    }
-
-    .variant-label {
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    .variant-options {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .option {
-      padding: 8px 16px;
-      border: 2px solid #ddd;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .option.selected {
-      border-color: var(--accent-color);
-      background: var(--accent-color);
-      color: #fff;
-    }
-
-    .seller-info {
-      margin-top: 20px;
-      padding: 20px;
-      background: #f9f9f9;
-      border-radius: var(--border-radius);
-      border-left: 5px solid var(--accent-color);
-    }
-
-    .distance-badge {
-      display: inline-block;
-      background: #e1f5fe;
-      color: #0288d1;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      margin-top: 10px;
-    }
-
-    .services-tag {
-      display: inline-block;
-      background: #f0f0f0;
-      padding: 4px 10px;
-      border-radius: 20px;
-      margin: 4px;
-      font-size: 0.85rem;
-    }
-
-    .horizontal-scroll {
-      display: flex;
-      overflow-x: auto;
-      gap: 15px;
-      padding: 10px 0;
-      scrollbar-width: thin;
-    }
-
-    .service-mini-card {
-      min-width: 200px;
-      background: #fff;
-      padding: 15px;
-      border-radius: var(--border-radius);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      border-top: 3px solid #3498db;
-    }
-
-    .breadcrumb {
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-      color: #666;
-    }
-
-    .breadcrumb a {
-      color: var(--accent-color);
+      font-weight: 800;
+      color: var(--primary);
       text-decoration: none;
     }
 
-    .hidden {
-      display: none;
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
     }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover { transform: translateY(-5px); }
+
+    .card-img {
+      width: 100%;
+      height: 200px;
+      background: #eee;
+      object-fit: cover;
+    }
+    .card-body { padding: 15px; }
+    .card-title { font-weight: 700; margin: 0 0 10px; }
+    .card-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      background: #eee;
+      margin-bottom: 8px;
+    }
+
+    /* Single Page Components */
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      background: #fff;
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    @media (min-width: 768px) {
+      .product-layout { grid-template-columns: 1.2fr 1fr; }
+    }
+
+    /* Carousel */
+    .carousel {
+      position: relative;
+      aspect-ratio: 1;
+      background: #f0f0f0;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .carousel-inner {
+      display: flex;
+      height: 100%;
+      transition: transform 0.5s ease;
+    }
+    .carousel-item { min-width: 100%; height: 100%; }
+    .carousel-item img { width: 100%; height: 100%; object-fit: contain; }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.8);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    /* Variants */
+    .variants { margin: 20px 0; }
+    .v-group { margin-bottom: 15px; }
+    .v-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; display: block; }
+    .v-options { display: flex; gap: 10px; flex-wrap: wrap; }
+    .v-btn {
+      padding: 10px 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .v-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .v-color { width: 35px; height: 35px; padding: 0; border-radius: 50%; }
+
+    /* Seller & GEO */
+    .seller-box {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #eee;
+      border-radius: var(--radius);
+    }
+    .geo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #e1f5fe;
+      color: #0288d1;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    /* Horizontal Scroll for Services */
+    .h-scroll {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 10px 0;
+      scrollbar-width: none;
+    }
+    .h-card {
+      min-width: 240px;
+      background: #fff;
+      padding: 15px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border-top: 4px solid var(--accent);
+    }
+
+    .price { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .hidden { display: none !important; }
   ]]></b:skin>
 </head>
 <body>
-  <header>
-    <div class='header-content'>
-      <h1><a expr:href='data:blog.homepageUrl' style='text-decoration:none; color:inherit;'><data:blog.title/></a></h1>
+  <nav class='nav'>
+    <div class='nav-inner'>
+      <a class='brand' expr:href='data:blog.homepageUrl'><data:blog.title/></a>
     </div>
-  </header>
+  </nav>
 
   <div class='container'>
-    <b:section id='main' showaddelement='yes'>
+    <b:section id='main-section' showaddelement='yes'>
       <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
         <b:includable id='main' var='top'>
-          <b:if cond='data:view.isHomepage'>
-            <b:include name='featuredSection'/>
-            <h2 class='section-title'>Latest Products</h2>
-          </b:if>
-
           <b:if cond='data:view.isMultipleItems'>
-            <div class='product-grid' id='main-grid'>
+            <div class='grid' id='app-grid'>
               <b:loop values='data:posts' var='post'>
-                <b:if cond='data:post.labels and data:post.labels any (l => l.name == "Service")'>
-                  <b:include data='post' name='serviceCard'/>
-                <b:else/>
-                  <b:include data='post' name='productCard'/>
-                </b:if>
+                <a class='card' expr:href='data:post.url' expr:id='&quot;card-&quot; + data:post.id'>
+                  <img class='card-img' expr:src='data:post.featuredImage ?: &quot;https://via.placeholder.com/400x300?text=Antinna&quot;'/>
+                  <div class='card-body'>
+                    <div class='card-badge'>Loading...</div>
+                    <h3 class='card-title'><data:post.title/></h3>
+                    <div class='card-price'>--</div>
+                  </div>
+                  <!-- Raw JSON-LD for Grid Parser -->
+                  <div class='hidden grid-data'><data:post.body/></div>
+                </a>
               </b:loop>
             </div>
-            <b:include name='nextprev'/>
+
+            <!-- Pagination -->
+            <div class='blog-pager' style='text-align:center; margin-top:40px;'>
+              <b:if cond='data:newerPageUrl'>
+                <a class='v-btn' expr:href='data:newerPageUrl' style='text-decoration:none;'>&#171; Newer</a>
+              </b:if>
+              <b:if cond='data:olderPageUrl'>
+                <a class='v-btn' expr:href='data:olderPageUrl' style='text-decoration:none; margin-left:10px;'>Older &#187;</a>
+              </b:if>
+            </div>
           <b:else/>
             <b:loop values='data:posts' var='post'>
-              <b:include data='post' name='postFull'/>
+              <div id='app-item'>
+                 <div class='breadcrumb' style='margin-bottom:20px; font-size:0.9rem;'>
+                   <a expr:href='data:blog.homepageUrl'>Home</a> / <data:post.title/>
+                 </div>
+
+                 <div class='product-layout' id='main-renderer'>
+                    <div class='carousel-container'>
+                       <div class='carousel' id='main-carousel'>
+                          <div class='carousel-inner' id='carousel-inner'></div>
+                          <button class='carousel-btn' onclick='prevSlide()' style='left:10px;'>&#10094;</button>
+                          <button class='carousel-btn' onclick='nextSlide()' style='right:10px;'>&#10095;</button>
+                       </div>
+                    </div>
+
+                    <div class='details-container'>
+                       <h1 id='p-name'><data:post.title/></h1>
+                       <div class='price' id='p-price'>--</div>
+                       <p id='p-desc' style='color:#666;'></p>
+
+                       <div class='variants' id='p-variants'></div>
+
+                       <div class='seller-box' id='p-seller'>
+                          <h4 style='margin:0 0 10px;'>Seller Details</h4>
+                          <div id='seller-info'></div>
+                          <div class='geo-badge' id='geo-info'>
+                             &#128205; <span id='geo-text'>GEO Points Present</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div id='other-services' style='margin-top:50px; display:none;'>
+                    <h2 style='margin-bottom:20px;'>Other Services Offered</h2>
+                    <div class='h-scroll' id='other-services-list'></div>
+                 </div>
+              </div>
+
+              <!-- Content for Parser -->
+              <div class='hidden' id='post-body-raw'><data:post.body/></div>
             </b:loop>
           </b:if>
-        </b:includable>
-
-        <b:includable id='productCard' var='post'>
-          <div class='product-card'>
-            <a expr:href='data:post.url'>
-              <div class='product-image-wrap'>
-                <b:if cond='data:post.featuredImage'>
-                  <img class='product-image' expr:src='data:post.featuredImage' expr:title='data:post.title'/>
-                <b:else/>
-                  <img class='product-image' src='https://via.placeholder.com/400x300?text=No+Image'/>
-                </b:if>
-              </div>
-            </a>
-            <div class='product-info'>
-              <h2 class='product-title'><a expr:href='data:post.url' style='text-decoration:none; color:inherit;'><data:post.title/></a></h2>
-              <div class='card-badge'>Product</div>
-              <a class='option' expr:href='data:post.url' style='text-align:center; margin-top:auto; text-decoration:none;'>View Details</a>
-            </div>
-          </div>
-        </b:includable>
-
-        <b:includable id='serviceCard' var='post'>
-          <div class='product-card service-card'>
-            <a expr:href='data:post.url'>
-              <div class='product-image-wrap'>
-                <b:if cond='data:post.featuredImage'>
-                  <img class='product-image' expr:src='data:post.featuredImage' expr:title='data:post.title'/>
-                <b:else/>
-                  <img class='product-image' src='https://via.placeholder.com/400x300?text=Service'/>
-                </b:if>
-              </div>
-            </a>
-            <div class='product-info'>
-              <h2 class='product-title'><a expr:href='data:post.url' style='text-decoration:none; color:inherit;'><data:post.title/></a></h2>
-              <div class='card-badge' style='background:#3498db;'>Service</div>
-              <a class='option' expr:href='data:post.url' style='text-align:center; margin-top:auto; text-decoration:none; border-color:#3498db; color:#3498db;'>Book Now</a>
-            </div>
-          </div>
-        </b:includable>
-
-        <b:includable id='postFull' var='post'>
-          <div class='breadcrumb'>
-            <a expr:href='data:blog.homepageUrl'>Home</a>
-            <b:if cond='data:post.labels'>
-              <b:loop values='data:post.labels' var='label'>
-                &#160;&#187;&#160; <a expr:href='data:label.url'><data:label.name/></a>
-              </b:loop>
-            </b:if>
-            &#160;&#187;&#160; <data:post.title/>
-          </div>
-
-          <article class='product-view' expr:id='&quot;post-&quot; + data:post.id'>
-            <div class='product-carousel-container'>
-              <div class='product-carousel' id='main-carousel'>
-                <div class='carousel-inner' id='carousel-inner'>
-                  <!-- Images injected by JS -->
-                </div>
-                <div class='carousel-controls'>
-                  <button class='carousel-btn' onclick='prevSlide()'>&#10094;</button>
-                  <button class='carousel-btn' onclick='nextSlide()'>&#10095;</button>
-                </div>
-              </div>
-            </div>
-
-            <div class='product-details'>
-              <h1 id='p-title'><data:post.title/></h1>
-              <div id='p-brand' style='font-weight: 600; color: #666; margin-top: -10px;'></div>
-              <div class='product-price' id='p-price'>--</div>
-              <div id='p-description'><!-- Description injected by JS --></div>
-
-              <div id='variant-selectors'>
-                <!-- Variant selectors injected by JS -->
-              </div>
-
-              <div class='seller-info' id='seller-section'>
-                <h3>Seller Information</h3>
-                <div id='seller-details'>
-                  <!-- Seller details injected by JS -->
-                </div>
-                <div class='distance-badge' id='distance-info' style='display:none;'>
-                  Calculating distance...
-                </div>
-                <div id='seller-services' style='margin-top:10px;'>
-                  <!-- Services injected by JS -->
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <div id='other-services-section' style='display:none; margin-top: 40px;'>
-            <h2 class='section-title'>Other Services Offered</h2>
-            <div class='horizontal-scroll' id='other-services-list'>
-              <!-- Services injected by JS -->
-            </div>
-          </div>
-
-          <!-- Hidden area to keep the original JSON-LD for JS to parse -->
-          <div id='json-ld-source' style='display:none;'>
-            <data:post.body/>
-          </div>
-          <div id='fallback-body' style='display:none;'>
-            <data:post.body/>
-          </div>
-        </b:includable>
-
-        <b:includable id='featuredSection'>
-          <b:if cond='data:posts and data:posts any (p => p.labels and p.labels any (l => l.name == "featured" or l.name == "popular"))'>
-            <h2 class='section-title'>Featured Items</h2>
-            <div class='featured-container'>
-              <div class='product-grid'>
-                <b:loop values='data:posts' var='post'>
-                  <b:if cond='data:post.labels and data:post.labels any (l => l.name == "featured" or l.name == "popular")'>
-                    <b:if cond='data:post.labels any (l => l.name == "Service")'>
-                      <b:include data='post' name='serviceCard'/>
-                    <b:else/>
-                      <b:include data='post' name='productCard'/>
-                    </b:if>
-                  </b:if>
-                </b:loop>
-              </div>
-            </div>
-          </b:if>
-        </b:includable>
-
-        <b:includable id='nextprev'>
-          <div class='blog-pager' id='blog-pager' style='margin-top:40px; text-align:center;'>
-            <b:if cond='data:newerPageUrl'>
-              <a class='option' expr:href='data:newerPageUrl' expr:title='data:newerPageTitle'>&#171; Newer</a>
-            </b:if>
-            <b:if cond='data:olderPageUrl'>
-              <a class='option' expr:href='data:olderPageUrl' expr:title='data:olderPageTitle'>Older &#187;</a>
-            </b:if>
-          </div>
         </b:includable>
       </b:widget>
     </b:section>
   </div>
 
   <script><![CDATA[
-    let productData = null;
-    let selectedVariants = {};
-    let currentSlide = 0;
+    let state = {
+      product: null,
+      service: null,
+      selected: {},
+      slide: 0
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (document.getElementById('json-ld-source')) {
-        initPage();
-      }
-      if (document.getElementById('main-grid')) {
-        initGrid();
-      }
+      if (document.getElementById('post-body-raw')) initItem();
+      if (document.getElementById('app-grid')) initGrid();
     });
 
-    function initPage() {
-      const source = document.getElementById('json-ld-source');
-      if (!source) return;
-
-      const scripts = source.querySelectorAll('script[type="application/ld+json"]');
-
-      scripts.forEach(script => {
-        try {
-          const text = script.textContent.trim();
-          if (!text) return;
-          const data = JSON.parse(text);
-          if (data['@type'] === 'ProductGroup') {
-            productData = data;
-          } else if (data['@type'] === 'Service') {
-            initServicePage(data);
-          }
-        } catch (e) {
-          console.error("Failed to parse JSON-LD. Please check if the JSON is valid.", e);
-          const errorMsg = document.createElement('div');
-          errorMsg.style.color = 'red';
-          errorMsg.textContent = "Error loading product data. Invalid JSON-LD format.";
-          document.querySelector('.product-details').prepend(errorMsg);
-        }
-      });
-
-      if (productData) {
-        renderProductInfo();
-        renderSelectors();
-        updateDisplay();
-      } else if (!window.serviceDataFound) {
-        // Fallback: Show original body if no JSON-LD data found
-        const fallback = document.getElementById('fallback-body');
-        if (fallback) {
-          document.getElementById('p-description').innerHTML = fallback.innerHTML;
-          document.getElementById('p-description').style.display = 'block';
-        }
-      }
-    }
-
     function initGrid() {
-      // Fetch Blogger JSON feed to get full content (including JSON-LD) for all posts on the page
-      const feedUrl = '/feeds/posts/default?alt=json';
-      fetch(feedUrl)
-        .then(res => res.json())
-        .then(data => {
-          const posts = data.feed.entry || [];
-          posts.forEach(entry => {
-            const content = entry.content.$t;
-            const url = entry.link.find(l => l.rel === 'alternate').href;
+      const cards = document.querySelectorAll('.card');
+      if (cards.length === 0) return;
 
-            // Try to find the card in the DOM matching this URL
-            const cards = document.querySelectorAll(`a[href="${url}"], a[href="${url.replace(/^http:/, 'https:')}"]`);
-            cards.forEach(cardLink => {
-              const card = cardLink.closest('.product-card');
-              if (card) {
-                updateCardWithData(card, content);
-              }
-            });
-          });
-        });
-    }
+      cards.forEach(card => {
+        const raw = card.querySelector('.grid-data');
+        if (!raw) return;
+        const data = parseJSON(raw.textContent);
+        if (!data) return;
 
-    function updateCardWithData(card, content) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(content, 'text/html');
-      const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+        const badge = card.querySelector('.card-badge');
+        const price = card.querySelector('.card-price');
+        const img = card.querySelector('.card-img');
 
-      scripts.forEach(script => {
-        try {
-          const data = JSON.parse(script.textContent);
-          if (data['@type'] === 'ProductGroup' || data['@type'] === 'Product') {
-            const firstVariant = data.hasVariant ? data.hasVariant[0] : data;
-            const price = firstVariant.offers ? `${firstVariant.offers.priceCurrency} ${firstVariant.offers.price}` : '';
-            const img = firstVariant.image ? (Array.isArray(firstVariant.image) ? firstVariant.image[0] : (firstVariant.image.url || firstVariant.image)) : '';
-
-            if (price) {
-              const info = card.querySelector('.product-info');
-              const priceDiv = document.createElement('div');
-              priceDiv.className = 'product-price';
-              priceDiv.style.fontSize = '1rem';
-              priceDiv.textContent = price;
-              info.insertBefore(priceDiv, info.querySelector('.option'));
-            }
-            if (img) {
-              card.querySelector('.product-image').src = img;
-            }
-          } else if (data['@type'] === 'Service') {
-             const price = data.hasOfferCatalog ? `${data.hasOfferCatalog.itemListElement[0].priceCurrency} ${data.hasOfferCatalog.itemListElement[0].price}` : '';
-             const img = data.image ? (Array.isArray(data.image) ? data.image[0] : (data.image.url || data.image)) : '';
-             if (price) {
-                const info = card.querySelector('.product-info');
-                const priceDiv = document.createElement('div');
-                priceDiv.className = 'product-price';
-                priceDiv.style.fontSize = '1rem';
-                priceDiv.textContent = price + ' (Starting)';
-                info.insertBefore(priceDiv, info.querySelector('.option'));
-             }
-             if (img) {
-               card.querySelector('.product-image').src = img;
-             }
+        if (data['@type'] === 'ProductGroup') {
+          badge.textContent = 'Product';
+          const variants = data.hasVariant || [];
+          if (variants.length > 0) {
+            const first = variants[0];
+            if (first.offers) price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
+            const imageSource = first.image || data.image;
+            if (imageSource) img.src = Array.isArray(imageSource) ? imageSource[0] : (imageSource.url || imageSource);
           }
-        } catch (e) {}
+        } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service' || data['@type'] === 'Product') {
+          badge.textContent = data['@type'] === 'Product' ? 'Product' : 'Service';
+          if (data['@type'] !== 'Product') {
+            badge.style.background = '#3498db';
+            badge.style.color = '#fff';
+          }
+
+          if (data.hasOfferCatalog && data.hasOfferCatalog.itemListElement) {
+            const off = data.hasOfferCatalog.itemListElement[0];
+            price.textContent = 'Starts ' + (off.priceCurrency || '') + ' ' + (off.price || '');
+          } else if (data.offers) {
+            price.textContent = (data.offers.priceCurrency || '') + ' ' + (data.offers.price || '');
+          }
+
+          if (data.image) img.src = Array.isArray(data.image) ? data.image[0] : (data.image.url || data.image);
+        }
       });
     }
 
-    window.serviceDataFound = false;
-
-    function initServicePage(data) {
-      window.serviceDataFound = true;
-      document.getElementById('p-title').textContent = data.name;
-      document.getElementById('p-description').textContent = data.description;
-
-      if (data.provider) {
-        renderSeller(data.provider);
+    function initItem() {
+      const rawEl = document.getElementById('post-body-raw');
+      if (!rawEl) return;
+      const data = parseJSON(rawEl.textContent);
+      if (!data) {
+        document.getElementById('main-renderer').innerHTML = '<div style="padding:20px; color:red;">Error: Could not parse product/service data. Please check JSON-LD format.</div>';
+        return;
       }
 
-      // Handle Service Area
-      if (data.areaServed) {
-        const area = typeof data.areaServed === 'string' ? data.areaServed : (data.areaServed.name || data.areaServed['@type']);
-        const areaBadge = document.createElement('div');
-        areaBadge.className = 'services-tag';
-        areaBadge.style.background = '#e8f5e9';
-        areaBadge.style.color = '#2e7d32';
-        areaBadge.innerHTML = '<strong>Area Served:</strong> ' + area;
-        document.getElementById('p-description').after(areaBadge);
-      }
-
-      // Handle Offers Catalog
-      if (data.hasOfferCatalog) {
-        const selectorContainer = document.getElementById('variant-selectors');
-        selectorContainer.innerHTML = '<h3>Service Options</h3>';
-        const optionsDiv = document.createElement('div');
-        optionsDiv.className = 'variant-options';
-
-        data.hasOfferCatalog.itemListElement.forEach(offer => {
-          const btn = document.createElement('button');
-          btn.className = 'option';
-          btn.innerHTML = `${offer.itemOffered.name} - <strong>${offer.priceCurrency} ${offer.price}</strong>`;
-          btn.onclick = () => {
-             document.getElementById('p-price').textContent = `${offer.priceCurrency} ${offer.price}`;
-             document.querySelectorAll('.variant-section .option').forEach(o => o.classList.remove('selected'));
-             btn.classList.add('selected');
-          };
-          optionsDiv.appendChild(btn);
-        });
-
-        const section = document.createElement('div');
-        section.className = 'variant-section';
-        section.appendChild(optionsDiv);
-        selectorContainer.appendChild(section);
-
-        // Select first by default
-        optionsDiv.firstChild.click();
-      }
-
-      // Handle Carousel if provider has photos or something (optional)
-      if (data.image) renderCarousel(data.image);
-    }
-
-    function renderProductInfo() {
-      document.getElementById('p-title').textContent = productData.name;
-      if (productData.brand) {
-        document.getElementById('p-brand').textContent = typeof productData.brand === 'string' ? productData.brand : productData.brand.name;
-      }
-      // Description might be handled by Blogger body, but we can override if present in JSON
-      if (productData.description) {
-        document.getElementById('p-description').textContent = productData.description;
+      if (data['@type'] === 'ProductGroup') {
+        state.product = data;
+        renderProduct();
+      } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service' || data['@type'] === 'Product') {
+        state.service = data; // Treat single Product or Service similarly for rendering
+        renderService();
       }
     }
 
-    function renderSelectors() {
-      const selectorContainer = document.getElementById('variant-selectors');
-      if (!selectorContainer) return;
-      selectorContainer.innerHTML = '';
+    function parseJSON(text) {
+      // Improved parser to handle multiple scripts and potential Blogger escaping
+      const div = document.createElement('div');
+      div.innerHTML = text;
+      const script = div.querySelector('script[type="application/ld+json"]');
+      const jsonStr = script ? script.textContent : text;
 
-      if (!productData.variesBy || !productData.hasVariant) return;
+      try {
+        // Clean up common Blogger escaping issues
+        const cleanJson = jsonStr.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        return JSON.parse(cleanJson);
+      } catch (e) {
+        // Second attempt: try finding the first { and last }
+        const fallbackMatch = jsonStr.match(/\{[\s\S]*\}/);
+        if (fallbackMatch) {
+          try {
+            return JSON.parse(fallbackMatch[0]);
+          } catch (e2) {}
+        }
+        console.error("JSON Parse Error", e);
+        return null;
+      }
+    }
 
-      productData.variesBy.forEach(attrUrl => {
-        const attr = attrUrl.split(/[\/#]/).pop(); // Handle both / and # in schema URLs
-        const values = [...new Set(productData.hasVariant.map(v => v[attr]).filter(Boolean))];
+    function renderProduct() {
+      const p = state.product;
+      document.getElementById('p-name').textContent = p.name;
+      document.getElementById('p-desc').textContent = p.description;
 
-        if (values.length > 0) {
-          const section = document.createElement('div');
-          section.className = 'variant-section';
-          section.innerHTML = `<span class="variant-label">Select ${attr.charAt(0).toUpperCase() + attr.slice(1)}:</span>`;
+      // Handle Brand if present
+      const brandDiv = document.createElement('div');
+      brandDiv.style.color = '#777';
+      brandDiv.style.marginTop = '-10px';
+      brandDiv.textContent = typeof p.brand === 'string' ? p.brand : (p.brand?.name || '');
+      document.getElementById('p-name').after(brandDiv);
 
-          const optionsDiv = document.createElement('div');
-          optionsDiv.className = 'variant-options';
+      const vars = document.getElementById('p-variants');
+      vars.innerHTML = '';
+
+      if (p.variesBy) {
+        p.variesBy.forEach(vUrl => {
+          const attr = vUrl.split(/[\/#]/).pop();
+          const values = [...new Set(p.hasVariant.map(v => v[attr]).filter(Boolean))];
+
+          const group = document.createElement('div');
+          group.className = 'v-group';
+          group.innerHTML = `<span class="v-label">Select ${attr}:</span>`;
+          const opts = document.createElement('div');
+          opts.className = 'v-options';
 
           values.forEach(val => {
             const btn = document.createElement('button');
-            btn.className = 'option';
-
-            // Basic color detection: if attribute is 'color', try to use it as background
+            btn.className = 'v-btn';
             if (attr.toLowerCase() === 'color') {
-              btn.style.backgroundColor = val.toLowerCase();
+              btn.classList.add('v-color');
+              btn.style.backgroundColor = val;
               btn.title = val;
-              // If it's a dark color, make text white
-              btn.style.color = ['black', 'navy', 'purple', 'maroon'].includes(val.toLowerCase()) ? 'white' : 'inherit';
             } else {
               btn.textContent = val;
             }
-
             btn.onclick = () => {
-              selectedVariants[attr] = val;
-              updateDisplay(attr);
+              state.selected[attr] = val;
+              updateProductView();
             };
-            optionsDiv.appendChild(btn);
+            opts.appendChild(btn);
           });
+          group.appendChild(opts);
+          vars.appendChild(group);
+          state.selected[attr] = values[0];
+        });
+      }
+      updateProductView();
+    }
 
-          section.appendChild(optionsDiv);
-          selectorContainer.appendChild(section);
+    function updateProductView() {
+      const p = state.product;
+      if (!p.hasVariant || p.hasVariant.length === 0) return;
 
-          // Default selection
-          if (!selectedVariants[attr]) selectedVariants[attr] = values[0];
-        }
+      const variant = p.hasVariant.find(v =>
+        Object.entries(state.selected).every(([key, val]) => v[key] === val)
+      ) || p.hasVariant[0];
+
+      if (variant.offers) {
+        document.getElementById('p-price').textContent = (variant.offers.priceCurrency || '') + ' ' + (variant.offers.price || '');
+        renderSeller(variant.offers.seller);
+      }
+      renderCarousel(variant.image || p.image);
+
+      // Highlight buttons
+      document.querySelectorAll('.v-btn').forEach(btn => {
+        const val = btn.textContent || btn.title;
+        const isSelected = Object.values(state.selected).some(v => v === val);
+        btn.classList.toggle('active', isSelected);
       });
     }
 
-    function updateDisplay(changedAttr) {
-      // Find matching variant
-      let variant = productData.hasVariant.find(v => {
-        return Object.entries(selectedVariants).every(([key, val]) => v[key] === val);
-      });
+    function renderService() {
+      const s = state.service;
+      document.getElementById('p-name').textContent = s.name;
+      document.getElementById('p-desc').textContent = s.description;
 
-      // If no exact match, prioritize the attribute that was just changed
-      if (!variant && changedAttr) {
-        variant = productData.hasVariant.find(v => v[changedAttr] === selectedVariants[changedAttr]);
+      // Handle Area Served
+      if (s.areaServed) {
+        const area = typeof s.areaServed === 'string' ? s.areaServed : (s.areaServed.name || s.areaServed['@type']);
+        const badge = document.createElement('div');
+        badge.className = 'geo-badge';
+        badge.style.background = '#e8f5e9';
+        badge.style.color = '#2e7d32';
+        badge.innerHTML = '&#127760; <b>Area Served:</b> ' + area;
+        document.getElementById('p-desc').after(badge);
       }
 
-      // Final fallback
-      if (!variant) variant = productData.hasVariant[0];
+      const vars = document.getElementById('p-variants');
+      vars.innerHTML = s.hasOfferCatalog ? '<h4>Available Options</h4>' : '';
 
-      // Update selectedVariants to match the actual found variant
-      productData.variesBy.forEach(attrUrl => {
-        const attr = attrUrl.split(/[\/#]/).pop();
-        if (variant[attr]) selectedVariants[attr] = variant[attr];
-      });
-
-      if (variant) {
-        // Update Price
-        const offer = variant.offers;
-        if (offer) {
-          document.getElementById('p-price').textContent = `${offer.priceCurrency} ${offer.price}`;
-          renderSeller(offer.seller);
-        }
-
-        // Update Carousel
-        renderCarousel(variant.image || productData.image);
-
-        // Update selected buttons UI
-        document.querySelectorAll('.variant-section').forEach(section => {
-          const label = section.querySelector('.variant-label').textContent.toLowerCase();
-          section.querySelectorAll('.option').forEach(opt => {
-            const attr = Object.keys(selectedVariants).find(k => label.includes(k));
-            if (attr && (opt.textContent === selectedVariants[attr] || opt.title === selectedVariants[attr])) {
-              opt.classList.add('selected');
-            } else {
-              opt.classList.remove('selected');
-            }
-          });
+      if (s.hasOfferCatalog) {
+        const opts = document.createElement('div');
+        opts.className = 'v-options';
+        s.hasOfferCatalog.itemListElement.forEach(offer => {
+          const btn = document.createElement('button');
+          btn.className = 'v-btn';
+          btn.innerHTML = `${offer.itemOffered.name} <br/> <b>${offer.priceCurrency} ${offer.price}</b>`;
+          btn.onclick = () => {
+            document.getElementById('p-price').textContent = `${offer.priceCurrency} ${offer.price}`;
+            document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+          };
+          opts.appendChild(btn);
         });
+        vars.appendChild(opts);
+        opts.firstChild.click();
       }
+
+      renderCarousel(s.image);
+      renderSeller(s.provider || s);
     }
 
     function renderCarousel(images) {
       const inner = document.getElementById('carousel-inner');
       inner.innerHTML = '';
-      currentSlide = 0;
+      state.slide = 0;
       inner.style.transform = `translateX(0)`;
 
-      let imgList = [];
-      if (Array.isArray(images)) imgList = images;
-      else if (typeof images === 'string') imgList = [images];
-      else if (images && images.url) imgList = [images.url];
-
-      if (imgList.length === 0) {
-        // Fallback to placeholder if no images in JSON
-        imgList = ['https://via.placeholder.com/600x400?text=No+Variant+Image'];
-      }
-
-      imgList.forEach(imgUrl => {
-        const item = document.createElement('div');
-        item.className = 'carousel-item';
-        item.innerHTML = `<img src="${imgUrl}" alt="Product Image"/>`;
-        inner.appendChild(item);
+      let list = Array.isArray(images) ? images : [images];
+      list.forEach(src => {
+        const div = document.createElement('div');
+        div.className = 'carousel-item';
+        div.innerHTML = `<img src="${src.url || src}"/>`;
+        inner.appendChild(div);
       });
     }
 
-    window.nextSlide = function() {
-      const items = document.querySelectorAll('.carousel-item');
-      if (items.length > 1) {
-        currentSlide = (currentSlide + 1) % items.length;
-        updateCarouselPos();
+    window.nextSlide = () => {
+      const count = document.querySelectorAll('.carousel-item').length;
+      if (count > 1) {
+        state.slide = (state.slide + 1) % count;
+        document.getElementById('carousel-inner').style.transform = `translateX(-${state.slide * 100}%)`;
       }
     };
 
-    window.prevSlide = function() {
-      const items = document.querySelectorAll('.carousel-item');
-      if (items.length > 1) {
-        currentSlide = (currentSlide - 1 + items.length) % items.length;
-        updateCarouselPos();
+    window.prevSlide = () => {
+      const count = document.querySelectorAll('.carousel-item').length;
+      if (count > 1) {
+        state.slide = (state.slide - 1 + count) % count;
+        document.getElementById('carousel-inner').style.transform = `translateX(-${state.slide * 100}%)`;
       }
     };
-
-    function updateCarouselPos() {
-      const inner = document.getElementById('carousel-inner');
-      inner.style.transform = `translateX(-${currentSlide * 100}%)`;
-    }
-
-    function renderOtherServices(services) {
-      if (!services || services.length === 0) return;
-
-      const section = document.getElementById('other-services-section');
-      const list = document.getElementById('other-services-list');
-      if (!section || !list) return;
-
-      section.style.display = 'block';
-      list.innerHTML = '';
-
-      services.forEach(s => {
-        const name = typeof s === 'string' ? s : (s.name || s['@type']);
-        const card = document.createElement('div');
-        card.className = 'service-mini-card';
-        card.innerHTML = `<strong>${name}</strong>`;
-        list.appendChild(card);
-      });
-    }
 
     function renderSeller(seller) {
-      if (!seller) {
-        document.getElementById('seller-section').classList.add('hidden');
-        return;
-      }
-      document.getElementById('seller-section').classList.remove('hidden');
-
-      const details = document.getElementById('seller-details');
-      details.innerHTML = `
+      if (!seller) return;
+      const info = document.getElementById('seller-info');
+      info.innerHTML = `
         <strong>${seller.name}</strong><br/>
-        Tel: ${seller.telephone || 'N/A'}<br/>
-        Locality: ${seller.address ? seller.address.addressLocality : 'N/A'}
+        ${seller.telephone || ''}<br/>
+        ${seller.address ? seller.address.addressLocality : ''}
       `;
 
-      // Handle Services / "Skilled in"
-      const servicesDiv = document.getElementById('seller-services');
-      servicesDiv.innerHTML = '';
-
-      let services = [];
-      if (seller.knowsAbout) {
-        services = Array.isArray(seller.knowsAbout) ? seller.knowsAbout : [seller.knowsAbout];
-      } else if (seller.hasOfferCatalog) {
-        const catalog = seller.hasOfferCatalog;
-        services = Array.isArray(catalog.itemListElement) ? catalog.itemListElement : [];
+      if (seller.geo) {
+        document.getElementById('geo-info').style.display = 'inline-flex';
+        document.getElementById('geo-text').textContent = seller.geo.latitude + ', ' + seller.geo.longitude;
+      } else {
+        document.getElementById('geo-info').style.display = 'none';
       }
+
+      // Handle "Other Services"
+      let services = [];
+      if (seller.knowsAbout) services = Array.isArray(seller.knowsAbout) ? seller.knowsAbout : [seller.knowsAbout];
+      else if (seller.hasOfferCatalog) services = seller.hasOfferCatalog.itemListElement || [];
+
+      const otherSection = document.getElementById('other-services');
+      const list = document.getElementById('other-services-list');
 
       if (services.length > 0) {
-        const title = document.createElement('div');
-        title.innerHTML = '<strong>Skilled in:</strong>';
-        servicesDiv.appendChild(title);
-        services.forEach(s => {
-          const span = document.createElement('span');
-          span.className = 'services-tag';
-          span.textContent = typeof s === 'string' ? s : (s.name || s['@type']);
-          servicesDiv.appendChild(span);
+        otherSection.style.display = 'block';
+        list.innerHTML = '';
+        services.forEach(ser => {
+          const name = typeof ser === 'string' ? ser : (ser.name || ser.itemOffered?.name);
+          const div = document.createElement('div');
+          div.className = 'h-card';
+          div.innerHTML = `<strong>${name}</strong>`;
+          list.appendChild(div);
         });
-
-        // Also render in the "Other Services" section at the bottom
-        renderOtherServices(services);
-      }
-
-      // Distance placeholder
-      if (seller.geo) {
-        const distInfo = document.getElementById('distance-info');
-        distInfo.style.display = 'inline-block';
-        distInfo.textContent = `Shop Location: ${seller.geo.latitude}, ${seller.geo.longitude} (Calculating distance...)`;
-        // In a real app, call the distance API here
+      } else {
+        otherSection.style.display = 'none';
       }
     }
   ]]></script>
