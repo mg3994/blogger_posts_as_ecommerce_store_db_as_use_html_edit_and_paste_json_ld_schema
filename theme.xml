@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <title><data:blog.pageTitle/></title>
+
+  <b:skin><![CDATA[
+    /* Variables */
+    :root {
+      --primary-color: #333;
+      --accent-color: #e67e22;
+      --bg-color: #f4f4f4;
+      --card-bg: #fff;
+      --text-color: #333;
+      --border-radius: 8px;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    header {
+      background: #fff;
+      padding: 1rem 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-image-wrap {
+      width: 100%;
+      height: 250px;
+      overflow: hidden;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-info {
+      padding: 15px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+      color: var(--primary-color);
+    }
+
+    /* Single Product View */
+    .product-view {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      background: #fff;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    @media (min-width: 768px) {
+      .product-view {
+        flex-direction: row;
+      }
+    }
+
+    .product-carousel-container {
+      flex: 1;
+      max-width: 100%;
+    }
+
+    .product-carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--border-radius);
+      background: #eee;
+      aspect-ratio: 4/3;
+    }
+
+    .carousel-inner {
+      display: flex;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .carousel-item {
+      min-width: 100%;
+    }
+
+    .carousel-item img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .carousel-controls {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .carousel-btn {
+      background: rgba(255,255,255,0.7);
+      color: #333;
+      border: none;
+      padding: 12px;
+      cursor: pointer;
+      pointer-events: auto;
+      border-radius: 50%;
+      margin: 0 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .product-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+
+    .variant-section {
+      margin: 10px 0;
+    }
+
+    .variant-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .variant-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .option {
+      padding: 8px 16px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option.selected {
+      border-color: var(--accent-color);
+      background: var(--accent-color);
+      color: #fff;
+    }
+
+    .seller-info {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: var(--border-radius);
+      border-left: 5px solid var(--accent-color);
+    }
+
+    .distance-badge {
+      display: inline-block;
+      background: #e1f5fe;
+      color: #0288d1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    .services-tag {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin: 4px;
+      font-size: 0.85rem;
+    }
+
+    .breadcrumb {
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .breadcrumb a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+  ]]></b:skin>
+</head>
+<body>
+  <header>
+    <div class='header-content'>
+      <h1><a expr:href='data:blog.homepageUrl' style='text-decoration:none; color:inherit;'><data:blog.title/></a></h1>
+    </div>
+  </header>
+
+  <div class='container'>
+    <b:section id='main' showaddelement='yes'>
+      <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
+        <b:includable id='main' var='top'>
+          <b:if cond='data:view.isMultipleItems'>
+            <div class='product-grid'>
+              <b:loop values='data:posts' var='post'>
+                <b:include data='post' name='postCard'/>
+              </b:loop>
+            </div>
+            <b:include name='nextprev'/>
+          <b:else/>
+            <b:loop values='data:posts' var='post'>
+              <b:include data='post' name='postFull'/>
+            </b:loop>
+          </b:if>
+        </b:includable>
+
+        <b:includable id='postCard' var='post'>
+          <div class='product-card'>
+            <a expr:href='data:post.url'>
+              <div class='product-image-wrap'>
+                <b:if cond='data:post.featuredImage'>
+                  <img class='product-image' expr:src='data:post.featuredImage' expr:title='data:post.title'/>
+                <b:else/>
+                  <img class='product-image' src='https://via.placeholder.com/400x300?text=No+Image'/>
+                </b:if>
+              </div>
+            </a>
+            <div class='product-info'>
+              <h2 class='product-title'><a expr:href='data:post.url' style='text-decoration:none; color:inherit;'><data:post.title/></a></h2>
+              <!-- Pricing and variants will be rendered by JS if possible,
+                   but for grid we'll show a "View Details" button -->
+              <a class='option' expr:href='data:post.url' style='text-align:center; margin-top:auto; text-decoration:none;'>View Details</a>
+            </div>
+          </div>
+        </b:includable>
+
+        <b:includable id='postFull' var='post'>
+          <div class='breadcrumb'>
+            <a expr:href='data:blog.homepageUrl'>Home</a>
+            <b:if cond='data:post.labels'>
+              <b:loop values='data:post.labels' var='label'>
+                &#160;&#187;&#160; <a expr:href='data:label.url'><data:label.name/></a>
+              </b:loop>
+            </b:if>
+            &#160;&#187;&#160; <data:post.title/>
+          </div>
+
+          <article class='product-view' expr:id='&quot;post-&quot; + data:post.id'>
+            <div class='product-carousel-container'>
+              <div class='product-carousel' id='main-carousel'>
+                <div class='carousel-inner' id='carousel-inner'>
+                  <!-- Images injected by JS -->
+                </div>
+                <div class='carousel-controls'>
+                  <button class='carousel-btn' onclick='prevSlide()'>&#10094;</button>
+                  <button class='carousel-btn' onclick='nextSlide()'>&#10095;</button>
+                </div>
+              </div>
+            </div>
+
+            <div class='product-details'>
+              <h1 id='p-title'><data:post.title/></h1>
+              <div id='p-brand' style='font-weight: 600; color: #666; margin-top: -10px;'></div>
+              <div class='product-price' id='p-price'>--</div>
+              <p id='p-description'><data:post.body/></p>
+
+              <div id='variant-selectors'>
+                <!-- Variant selectors injected by JS -->
+              </div>
+
+              <div class='seller-info' id='seller-section'>
+                <h3>Seller Information</h3>
+                <div id='seller-details'>
+                  <!-- Seller details injected by JS -->
+                </div>
+                <div class='distance-badge' id='distance-info' style='display:none;'>
+                  Calculating distance...
+                </div>
+                <div id='seller-services' style='margin-top:10px;'>
+                  <!-- Services injected by JS -->
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Hidden area to keep the original JSON-LD for JS to parse -->
+          <div id='json-ld-source' style='display:none;'>
+            <data:post.body/>
+          </div>
+        </b:includable>
+
+        <b:includable id='nextprev'>
+          <div class='blog-pager' id='blog-pager' style='margin-top:40px; text-align:center;'>
+            <b:if cond='data:newerPageUrl'>
+              <a class='option' expr:href='data:newerPageUrl' expr:title='data:newerPageTitle'>&#171; Newer</a>
+            </b:if>
+            <b:if cond='data:olderPageUrl'>
+              <a class='option' expr:href='data:olderPageUrl' expr:title='data:olderPageTitle'>Older &#187;</a>
+            </b:if>
+          </div>
+        </b:includable>
+      </b:widget>
+    </b:section>
+  </div>
+
+  <script><![CDATA[
+    let productData = null;
+    let selectedVariants = {};
+    let currentSlide = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('json-ld-source')) {
+        initProductPage();
+      }
+    });
+
+    function initProductPage() {
+      const source = document.getElementById('json-ld-source');
+      const scripts = source.querySelectorAll('script[type="application/ld+json"]');
+
+      scripts.forEach(script => {
+        try {
+          const data = JSON.parse(script.textContent);
+          if (data['@type'] === 'ProductGroup') {
+            productData = data;
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON-LD", e);
+        }
+      });
+
+      if (productData) {
+        renderProductInfo();
+        renderSelectors();
+        updateDisplay();
+      }
+    }
+
+    function renderProductInfo() {
+      document.getElementById('p-title').textContent = productData.name;
+      if (productData.brand) {
+        document.getElementById('p-brand').textContent = typeof productData.brand === 'string' ? productData.brand : productData.brand.name;
+      }
+      // Description might be handled by Blogger body, but we can override if present in JSON
+      if (productData.description) {
+        document.getElementById('p-description').textContent = productData.description;
+      }
+    }
+
+    function renderSelectors() {
+      const selectorContainer = document.getElementById('variant-selectors');
+      selectorContainer.innerHTML = '';
+
+      if (!productData.variesBy || !productData.hasVariant) return;
+
+      productData.variesBy.forEach(attrUrl => {
+        const attr = attrUrl.split('/').pop(); // e.g., 'color'
+        const values = [...new Set(productData.hasVariant.map(v => v[attr]).filter(Boolean))];
+
+        if (values.length > 0) {
+          const section = document.createElement('div');
+          section.className = 'variant-section';
+          section.innerHTML = `<span class="variant-label">Select ${attr.charAt(0).toUpperCase() + attr.slice(1)}:</span>`;
+
+          const optionsDiv = document.createElement('div');
+          optionsDiv.className = 'variant-options';
+
+          values.forEach(val => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+
+            // Basic color detection: if attribute is 'color', try to use it as background
+            if (attr.toLowerCase() === 'color') {
+              btn.style.backgroundColor = val.toLowerCase();
+              btn.title = val;
+              // If it's a dark color, make text white
+              btn.style.color = ['black', 'navy', 'purple', 'maroon'].includes(val.toLowerCase()) ? 'white' : 'inherit';
+            } else {
+              btn.textContent = val;
+            }
+
+            btn.onclick = () => {
+              selectedVariants[attr] = val;
+              updateDisplay(attr);
+            };
+            optionsDiv.appendChild(btn);
+          });
+
+          section.appendChild(optionsDiv);
+          selectorContainer.appendChild(section);
+
+          // Default selection
+          if (!selectedVariants[attr]) selectedVariants[attr] = values[0];
+        }
+      });
+    }
+
+    function updateDisplay(changedAttr) {
+      // Find matching variant
+      let variant = productData.hasVariant.find(v => {
+        return Object.entries(selectedVariants).every(([key, val]) => v[key] === val);
+      });
+
+      // If no exact match, prioritize the attribute that was just changed
+      if (!variant && changedAttr) {
+        variant = productData.hasVariant.find(v => v[changedAttr] === selectedVariants[changedAttr]);
+      }
+
+      // Final fallback
+      if (!variant) variant = productData.hasVariant[0];
+
+      // Update selectedVariants to match the actual found variant
+      productData.variesBy.forEach(attrUrl => {
+        const attr = attrUrl.split('/').pop();
+        if (variant[attr]) selectedVariants[attr] = variant[attr];
+      });
+
+      if (variant) {
+        // Update Price
+        const offer = variant.offers;
+        if (offer) {
+          document.getElementById('p-price').textContent = `${offer.priceCurrency} ${offer.price}`;
+          renderSeller(offer.seller);
+        }
+
+        // Update Carousel
+        renderCarousel(variant.image || productData.image);
+
+        // Update selected buttons UI
+        document.querySelectorAll('.variant-section').forEach(section => {
+          const label = section.querySelector('.variant-label').textContent.toLowerCase();
+          section.querySelectorAll('.option').forEach(opt => {
+            const attr = Object.keys(selectedVariants).find(k => label.includes(k));
+            if (attr && (opt.textContent === selectedVariants[attr] || opt.title === selectedVariants[attr])) {
+              opt.classList.add('selected');
+            } else {
+              opt.classList.remove('selected');
+            }
+          });
+        });
+      }
+    }
+
+    function renderCarousel(images) {
+      const inner = document.getElementById('carousel-inner');
+      inner.innerHTML = '';
+      currentSlide = 0;
+      inner.style.transform = `translateX(0)`;
+
+      let imgList = [];
+      if (Array.isArray(images)) imgList = images;
+      else if (typeof images === 'string') imgList = [images];
+      else if (images && images.url) imgList = [images.url];
+
+      if (imgList.length === 0) {
+        // Fallback to placeholder if no images in JSON
+        imgList = ['https://via.placeholder.com/600x400?text=No+Variant+Image'];
+      }
+
+      imgList.forEach(imgUrl => {
+        const item = document.createElement('div');
+        item.className = 'carousel-item';
+        item.innerHTML = `<img src="${imgUrl}" alt="Product Image"/>`;
+        inner.appendChild(item);
+      });
+    }
+
+    window.nextSlide = function() {
+      const items = document.querySelectorAll('.carousel-item');
+      if (items.length > 1) {
+        currentSlide = (currentSlide + 1) % items.length;
+        updateCarouselPos();
+      }
+    };
+
+    window.prevSlide = function() {
+      const items = document.querySelectorAll('.carousel-item');
+      if (items.length > 1) {
+        currentSlide = (currentSlide - 1 + items.length) % items.length;
+        updateCarouselPos();
+      }
+    };
+
+    function updateCarouselPos() {
+      const inner = document.getElementById('carousel-inner');
+      inner.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+
+    function renderSeller(seller) {
+      if (!seller) {
+        document.getElementById('seller-section').classList.add('hidden');
+        return;
+      }
+      document.getElementById('seller-section').classList.remove('hidden');
+
+      const details = document.getElementById('seller-details');
+      details.innerHTML = `
+        <strong>${seller.name}</strong><br/>
+        Tel: ${seller.telephone || 'N/A'}<br/>
+        Locality: ${seller.address ? seller.address.addressLocality : 'N/A'}
+      `;
+
+      // Handle Services / "Skilled in"
+      const servicesDiv = document.getElementById('seller-services');
+      servicesDiv.innerHTML = '';
+      const services = seller.knowsAbout || seller.hasOfferCatalog || [];
+      if (Array.isArray(services) && services.length > 0) {
+        const title = document.createElement('div');
+        title.innerHTML = '<strong>Skilled in:</strong>';
+        servicesDiv.appendChild(title);
+        services.forEach(s => {
+          const span = document.createElement('span');
+          span.className = 'services-tag';
+          span.textContent = typeof s === 'string' ? s : (s.name || s['@type']);
+          servicesDiv.appendChild(span);
+        });
+      }
+
+      // Distance placeholder
+      if (seller.geo) {
+        const distInfo = document.getElementById('distance-info');
+        distInfo.style.display = 'inline-block';
+        distInfo.textContent = `Shop Location: ${seller.geo.latitude}, ${seller.geo.longitude} (Calculating distance...)`;
+        // In a real app, call the distance API here
+      }
+    }
+  ]]></script>
+</body>
+</html>
