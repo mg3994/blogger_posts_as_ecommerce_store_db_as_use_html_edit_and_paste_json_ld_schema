@@ -185,6 +185,12 @@
 
     .price { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
     .hidden { display: none !important; }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
   ]]></b:skin>
 </head>
 <body>
@@ -230,8 +236,13 @@
                    <a expr:href='data:blog.homepageUrl'>Home</a> / <data:post.title/>
                  </div>
 
-                 <div class='product-layout' id='main-renderer'>
-                    <div class='carousel-container'>
+                 <div class='product-layout' id='main-renderer' style='min-height: 400px;'>
+                    <!-- Initializing State -->
+                    <div id='initializing-state' style='padding:40px; text-align:center; grid-column: 1 / -1;'>
+                       <div class='v-btn' style='display:inline-block; cursor:default; animation: pulse 1.5s infinite;'>Initializing Data Engine...</div>
+                    </div>
+
+                    <div class='carousel-container hidden' id='carousel-section'>
                        <div class='carousel' id='main-carousel'>
                           <div class='carousel-inner' id='carousel-inner'></div>
                           <button class='carousel-btn' onclick='prevSlide()' style='left:10px;'>&#10094;</button>
@@ -239,7 +250,7 @@
                        </div>
                     </div>
 
-                    <div class='details-container'>
+                    <div class='details-container hidden' id='details-section'>
                        <h1 id='p-name'><data:post.title/></h1>
                        <div class='price' id='p-price'>--</div>
                        <p id='p-desc' style='color:#666;'></p>
@@ -280,8 +291,11 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (document.getElementById('post-body-raw')) initItem();
-      if (document.getElementById('app-grid')) initGrid();
+      // Small timeout to ensure Blogger has finished its own internal rendering
+      setTimeout(() => {
+        if (document.getElementById('post-body-raw')) initItem();
+        if (document.getElementById('app-grid')) initGrid();
+      }, 100);
     });
 
     function initGrid() {
@@ -304,7 +318,7 @@
           if (variants.length > 0) {
             const first = variants[0];
             if (first.offers) price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
-            const imageSource = first.image || data.image;
+            const imageSource = first.image || data.image || (variants.find(v => v.image)?.image);
             if (imageSource) img.src = Array.isArray(imageSource) ? imageSource[0] : (imageSource.url || imageSource);
           }
         } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service' || data['@type'] === 'Product') {
@@ -329,9 +343,21 @@
     function initItem() {
       const rawEl = document.getElementById('post-body-raw');
       if (!rawEl) return;
-      const data = parseJSON(rawEl.textContent);
+
+      let data = parseJSON(rawEl.textContent);
+
+      // If parsing failed, try finding any script tag in the whole document as a last resort
       if (!data) {
-        document.getElementById('main-renderer').innerHTML = '<div style="padding:20px; color:red;">Error: Could not parse product/service data. Please check JSON-LD format.</div>';
+        const allScripts = document.querySelectorAll('script[type="application/ld+json"]');
+        for (let s of allScripts) {
+          data = parseJSON(s.textContent);
+          if (data && (data['@type'] === 'ProductGroup' || data['@type'] === 'Service' || data['@type'] === 'LocalBusiness')) break;
+        }
+      }
+
+      if (!data) {
+        const initEl = document.getElementById('initializing-state');
+        if (initEl) initEl.innerHTML = '<div style="color:red; font-weight:bold;">Error: No valid Product or Service data found in this post.</div>';
         return;
       }
 
@@ -339,31 +365,46 @@
         state.product = data;
         renderProduct();
       } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service' || data['@type'] === 'Product') {
-        state.service = data; // Treat single Product or Service similarly for rendering
+        state.service = data;
         renderService();
       }
+
+      const init = document.getElementById('initializing-state');
+      if (init) init.classList.add('hidden');
+      document.getElementById('carousel-section')?.classList.remove('hidden');
+      document.getElementById('details-section')?.classList.remove('hidden');
+    }
+
+    function decodeEntities(text) {
+      const textArea = document.createElement('textarea');
+      textArea.innerHTML = text;
+      return textArea.value;
     }
 
     function parseJSON(text) {
-      // Improved parser to handle multiple scripts and potential Blogger escaping
-      const div = document.createElement('div');
-      div.innerHTML = text;
-      const script = div.querySelector('script[type="application/ld+json"]');
-      const jsonStr = script ? script.textContent : text;
+      if (!text) return null;
+
+      // Try to find JSON-LD in a script tag using regex first (more robust against Blogger wrapping)
+      const scriptMatch = text.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i);
+      let jsonStr = scriptMatch ? scriptMatch[1] : text;
+
+      // Decode entities multiple times if needed (Blogger sometimes double-escapes)
+      let decoded = decodeEntities(jsonStr);
+      if (decoded.includes('&quot;')) decoded = decodeEntities(decoded);
 
       try {
-        // Clean up common Blogger escaping issues
-        const cleanJson = jsonStr.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        // Remove comments that might be inside the script
+        const cleanJson = decoded.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1').trim();
         return JSON.parse(cleanJson);
       } catch (e) {
-        // Second attempt: try finding the first { and last }
-        const fallbackMatch = jsonStr.match(/\{[\s\S]*\}/);
-        if (fallbackMatch) {
+        // Final fallback: try to find the largest JSON-like block { ... }
+        const jsonBlock = decoded.match(/\{[\s\S]*\}/);
+        if (jsonBlock) {
           try {
-            return JSON.parse(fallbackMatch[0]);
+            return JSON.parse(jsonBlock[0]);
           } catch (e2) {}
         }
-        console.error("JSON Parse Error", e);
+        console.error("Failed to parse JSON-LD:", e, "Original text snippet:", text.substring(0, 100));
         return null;
       }
     }
