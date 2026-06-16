@@ -202,6 +202,19 @@
       margin-top: 10px;
     }
 
+    .social-row { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    .social-link {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      background: var(--primary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      transition: opacity 0.2s;
+    }
+    .social-link:hover { opacity: 0.8; }
+
     /* Horizontal Scroll for Services */
     .h-scroll {
       display: flex;
@@ -868,15 +881,35 @@
     function renderSeller(seller) {
       if (!seller) return;
       const info = document.getElementById('seller-info');
-      info.innerHTML = `
-        <strong>${seller.name}</strong><br/>
-        ${seller.telephone || ''}<br/>
-        ${seller.address ? (seller.address.addressLocality || '') : ''}
-      `;
+
+      let contactHtml = `<strong>${seller.name}</strong><br/>`;
+      if (seller.telephone) contactHtml += `&#128222; ${seller.telephone}<br/>`;
+      if (seller.email) contactHtml += `&#128231; <a href="mailto:${seller.email}" style="color:inherit;">${seller.email}</a><br/>`;
+      if (seller.address) {
+        const addr = seller.address;
+        contactHtml += `&#128205; ${addr.streetAddress || ''} ${addr.addressLocality || ''} ${addr.addressCountry || ''}`;
+      }
+
+      // Social Links
+      if (seller.sameAs) {
+        contactHtml += `<div class="social-row">`;
+        const links = Array.isArray(seller.sameAs) ? seller.sameAs : [seller.sameAs];
+        links.forEach(url => {
+          let label = 'Link';
+          if (url.includes('facebook.com')) label = 'Facebook';
+          else if (url.includes('instagram.com')) label = 'Instagram';
+          else if (url.includes('twitter.com') || url.includes('x.com')) label = 'Twitter';
+          else if (url.includes('linkedin.com')) label = 'LinkedIn';
+          contactHtml += `<a href="${url}" class="social-link" target="_blank">${label}</a>`;
+        });
+        contactHtml += `</div>`;
+      }
+
+      info.innerHTML = contactHtml;
 
       if (seller.geo) {
         document.getElementById('geo-info').style.display = 'inline-flex';
-        document.getElementById('geo-text').textContent = seller.geo.latitude + ', ' + seller.geo.longitude;
+        document.getElementById('geo-text').textContent = (seller.geo.latitude || '') + ', ' + (seller.geo.longitude || '');
       } else {
         document.getElementById('geo-info').style.display = 'none';
       }
