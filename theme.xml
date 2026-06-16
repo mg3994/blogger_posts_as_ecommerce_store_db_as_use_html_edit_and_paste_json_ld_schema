@@ -150,13 +150,21 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.9);
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+      z-index: 10;
     }
+    .carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
 
     /* Variants */
     .variants { margin: 20px 0; }
@@ -712,7 +720,13 @@
 
         renderSeller(variant.offers.seller);
       }
-      renderCarousel(variant.image || p.image);
+
+      // Multi-Image Merge Logic: Show variant images first, then group images
+      let vImgs = Array.isArray(variant.image) ? variant.image : (variant.image ? [variant.image] : []);
+      let pImgs = Array.isArray(p.image) ? p.image : (p.image ? [p.image] : []);
+      let allImgs = [...new Set([...vImgs, ...pImgs])];
+
+      renderCarousel(allImgs);
 
       // Render Specifications
       const specs = document.getElementById('p-specs');
