@@ -282,7 +282,7 @@
     </b:section>
   </div>
 
-  <script><![CDATA[
+  <script>//<![CDATA[
     let state = {
       product: null,
       service: null,
@@ -591,6 +591,6 @@
         otherSection.style.display = 'none';
       }
     }
-  ]]></script>
+  //]]></script>
 </body>
 </html>
