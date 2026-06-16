@@ -184,6 +184,7 @@
     }
 
     .price { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .section-title { font-size: 1.3rem; margin: 30px 0 15px; border-left: 5px solid var(--accent); padding-left: 15px; }
     .hidden { display: none !important; }
 
     @keyframes pulse {
@@ -203,20 +204,38 @@
   <div class='container'>
     <b:section id='main-section' showaddelement='yes'>
       <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
+        <b:includable id='postCard' var='post'>
+          <a class='card' expr:href='data:post.url' expr:id='&quot;card-&quot; + data:post.id'>
+            <img class='card-img' expr:src='data:post.featuredImage ?: &quot;https://via.placeholder.com/400x300?text=Antinna&quot;'/>
+            <div class='card-body'>
+              <div class='card-badge'>Loading...</div>
+              <h3 class='card-title'><data:post.title/></h3>
+              <div class='card-price'>--</div>
+            </div>
+            <!-- Raw JSON-LD for Grid Parser -->
+            <div class='hidden grid-data'><data:post.body/></div>
+          </a>
+        </b:includable>
+
         <b:includable id='main' var='top'>
+          <b:if cond='data:view.isHomepage'>
+             <b:if cond='data:posts and data:posts any (p => p.labels and p.labels any (l => l.name == "featured" or l.name == "popular"))'>
+               <h2 class='section-title'>Featured Selection</h2>
+               <div class='grid' id='featured-grid'>
+                 <b:loop values='data:posts' var='post'>
+                   <b:if cond='data:post.labels and data:post.labels any (l => l.name == "featured" or l.name == "popular")'>
+                     <b:include data='post' name='postCard'/>
+                   </b:if>
+                 </b:loop>
+               </div>
+             </b:if>
+             <h2 class='section-title'>Latest Arrivals</h2>
+          </b:if>
+
           <b:if cond='data:view.isMultipleItems'>
             <div class='grid' id='app-grid'>
               <b:loop values='data:posts' var='post'>
-                <a class='card' expr:href='data:post.url' expr:id='&quot;card-&quot; + data:post.id'>
-                  <img class='card-img' expr:src='data:post.featuredImage ?: &quot;https://via.placeholder.com/400x300?text=Antinna&quot;'/>
-                  <div class='card-body'>
-                    <div class='card-badge'>Loading...</div>
-                    <h3 class='card-title'><data:post.title/></h3>
-                    <div class='card-price'>--</div>
-                  </div>
-                  <!-- Raw JSON-LD for Grid Parser -->
-                  <div class='hidden grid-data'><data:post.body/></div>
-                </a>
+                <b:include data='post' name='postCard'/>
               </b:loop>
             </div>
 
@@ -233,7 +252,13 @@
             <b:loop values='data:posts' var='post'>
               <div id='app-item'>
                  <div class='breadcrumb' style='margin-bottom:20px; font-size:0.9rem;'>
-                   <a expr:href='data:blog.homepageUrl'>Home</a> / <data:post.title/>
+                   <a expr:href='data:blog.homepageUrl'>Home</a>
+                   <b:if cond='data:post.labels'>
+                     <b:loop values='data:post.labels' var='label'>
+                       / <a expr:href='data:label.url'><data:label.name/></a>
+                     </b:loop>
+                   </b:if>
+                   / <data:post.title/>
                  </div>
 
                  <div class='product-layout' id='main-renderer' style='min-height: 400px;'>
@@ -282,7 +307,7 @@
     </b:section>
   </div>
 
-  <script>//<![CDATA[
+  <script type='text/javascript'>//<![CDATA[
     let state = {
       product: null,
       service: null,
@@ -306,9 +331,15 @@
         const raw = card.querySelector('.grid-data');
         if (!raw) return;
         const data = parseJSON(raw.textContent);
-        if (!data) return;
 
         const badge = card.querySelector('.card-badge');
+        if (!data) {
+          badge.textContent = 'JSON Error';
+          badge.style.background = '#e74c3c';
+          badge.style.color = '#fff';
+          return;
+        }
+
         const price = card.querySelector('.card-price');
         const img = card.querySelector('.card-img');
 
@@ -342,7 +373,10 @@
 
     function initItem() {
       const rawEl = document.getElementById('post-body-raw');
-      if (!rawEl) return;
+      if (!rawEl) {
+        console.warn("Element post-body-raw not found");
+        return;
+      }
 
       let data = parseJSON(rawEl.textContent);
 
