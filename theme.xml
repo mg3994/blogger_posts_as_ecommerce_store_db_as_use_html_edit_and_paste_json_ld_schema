@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head>
   <meta content='width=device-width, initial-scale=1' name='viewport'/>
   <title><data:blog.pageTitle/></title>
@@ -262,6 +262,23 @@
       font-size: 0.85rem;
     }
 
+    .horizontal-scroll {
+      display: flex;
+      overflow-x: auto;
+      gap: 15px;
+      padding: 10px 0;
+      scrollbar-width: thin;
+    }
+
+    .service-mini-card {
+      min-width: 200px;
+      background: #fff;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-top: 3px solid #3498db;
+    }
+
     .breadcrumb {
       margin-bottom: 20px;
       font-size: 0.9rem;
@@ -295,9 +312,9 @@
           </b:if>
 
           <b:if cond='data:view.isMultipleItems'>
-            <div class='product-grid'>
+            <div class='product-grid' id='main-grid'>
               <b:loop values='data:posts' var='post'>
-                <b:if cond='data:post.labels any (l => l.name == "Service")'>
+                <b:if cond='data:post.labels and data:post.labels any (l => l.name == "Service")'>
                   <b:include data='post' name='serviceCard'/>
                 <b:else/>
                   <b:include data='post' name='productCard'/>
@@ -399,19 +416,29 @@
             </div>
           </article>
 
+          <div id='other-services-section' style='display:none; margin-top: 40px;'>
+            <h2 class='section-title'>Other Services Offered</h2>
+            <div class='horizontal-scroll' id='other-services-list'>
+              <!-- Services injected by JS -->
+            </div>
+          </div>
+
           <!-- Hidden area to keep the original JSON-LD for JS to parse -->
           <div id='json-ld-source' style='display:none;'>
+            <data:post.body/>
+          </div>
+          <div id='fallback-body' style='display:none;'>
             <data:post.body/>
           </div>
         </b:includable>
 
         <b:includable id='featuredSection'>
-          <b:if cond='data:posts any (p => p.labels any (l => l.name == "featured" or l.name == "popular"))'>
+          <b:if cond='data:posts and data:posts any (p => p.labels and p.labels any (l => l.name == "featured" or l.name == "popular"))'>
             <h2 class='section-title'>Featured Items</h2>
             <div class='featured-container'>
               <div class='product-grid'>
                 <b:loop values='data:posts' var='post'>
-                  <b:if cond='data:post.labels any (l => l.name == "featured" or l.name == "popular")'>
+                  <b:if cond='data:post.labels and data:post.labels any (l => l.name == "featured" or l.name == "popular")'>
                     <b:if cond='data:post.labels any (l => l.name == "Service")'>
                       <b:include data='post' name='serviceCard'/>
                     <b:else/>
@@ -447,6 +474,9 @@
       if (document.getElementById('json-ld-source')) {
         initPage();
       }
+      if (document.getElementById('main-grid')) {
+        initGrid();
+      }
     });
 
     function initPage() {
@@ -478,10 +508,86 @@
         renderProductInfo();
         renderSelectors();
         updateDisplay();
+      } else if (!window.serviceDataFound) {
+        // Fallback: Show original body if no JSON-LD data found
+        const fallback = document.getElementById('fallback-body');
+        if (fallback) {
+          document.getElementById('p-description').innerHTML = fallback.innerHTML;
+          document.getElementById('p-description').style.display = 'block';
+        }
       }
     }
 
+    function initGrid() {
+      // Fetch Blogger JSON feed to get full content (including JSON-LD) for all posts on the page
+      const feedUrl = '/feeds/posts/default?alt=json';
+      fetch(feedUrl)
+        .then(res => res.json())
+        .then(data => {
+          const posts = data.feed.entry || [];
+          posts.forEach(entry => {
+            const content = entry.content.$t;
+            const url = entry.link.find(l => l.rel === 'alternate').href;
+
+            // Try to find the card in the DOM matching this URL
+            const cards = document.querySelectorAll(`a[href="${url}"], a[href="${url.replace(/^http:/, 'https:')}"]`);
+            cards.forEach(cardLink => {
+              const card = cardLink.closest('.product-card');
+              if (card) {
+                updateCardWithData(card, content);
+              }
+            });
+          });
+        });
+    }
+
+    function updateCardWithData(card, content) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(content, 'text/html');
+      const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+
+      scripts.forEach(script => {
+        try {
+          const data = JSON.parse(script.textContent);
+          if (data['@type'] === 'ProductGroup' || data['@type'] === 'Product') {
+            const firstVariant = data.hasVariant ? data.hasVariant[0] : data;
+            const price = firstVariant.offers ? `${firstVariant.offers.priceCurrency} ${firstVariant.offers.price}` : '';
+            const img = firstVariant.image ? (Array.isArray(firstVariant.image) ? firstVariant.image[0] : (firstVariant.image.url || firstVariant.image)) : '';
+
+            if (price) {
+              const info = card.querySelector('.product-info');
+              const priceDiv = document.createElement('div');
+              priceDiv.className = 'product-price';
+              priceDiv.style.fontSize = '1rem';
+              priceDiv.textContent = price;
+              info.insertBefore(priceDiv, info.querySelector('.option'));
+            }
+            if (img) {
+              card.querySelector('.product-image').src = img;
+            }
+          } else if (data['@type'] === 'Service') {
+             const price = data.hasOfferCatalog ? `${data.hasOfferCatalog.itemListElement[0].priceCurrency} ${data.hasOfferCatalog.itemListElement[0].price}` : '';
+             const img = data.image ? (Array.isArray(data.image) ? data.image[0] : (data.image.url || data.image)) : '';
+             if (price) {
+                const info = card.querySelector('.product-info');
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'product-price';
+                priceDiv.style.fontSize = '1rem';
+                priceDiv.textContent = price + ' (Starting)';
+                info.insertBefore(priceDiv, info.querySelector('.option'));
+             }
+             if (img) {
+               card.querySelector('.product-image').src = img;
+             }
+          }
+        } catch (e) {}
+      });
+    }
+
+    window.serviceDataFound = false;
+
     function initServicePage(data) {
+      window.serviceDataFound = true;
       document.getElementById('p-title').textContent = data.name;
       document.getElementById('p-description').textContent = data.description;
 
@@ -683,6 +789,25 @@
       inner.style.transform = `translateX(-${currentSlide * 100}%)`;
     }
 
+    function renderOtherServices(services) {
+      if (!services || services.length === 0) return;
+
+      const section = document.getElementById('other-services-section');
+      const list = document.getElementById('other-services-list');
+      if (!section || !list) return;
+
+      section.style.display = 'block';
+      list.innerHTML = '';
+
+      services.forEach(s => {
+        const name = typeof s === 'string' ? s : (s.name || s['@type']);
+        const card = document.createElement('div');
+        card.className = 'service-mini-card';
+        card.innerHTML = `<strong>${name}</strong>`;
+        list.appendChild(card);
+      });
+    }
+
     function renderSeller(seller) {
       if (!seller) {
         document.getElementById('seller-section').classList.add('hidden');
@@ -700,8 +825,16 @@
       // Handle Services / "Skilled in"
       const servicesDiv = document.getElementById('seller-services');
       servicesDiv.innerHTML = '';
-      const services = seller.knowsAbout || seller.hasOfferCatalog || [];
-      if (Array.isArray(services) && services.length > 0) {
+
+      let services = [];
+      if (seller.knowsAbout) {
+        services = Array.isArray(seller.knowsAbout) ? seller.knowsAbout : [seller.knowsAbout];
+      } else if (seller.hasOfferCatalog) {
+        const catalog = seller.hasOfferCatalog;
+        services = Array.isArray(catalog.itemListElement) ? catalog.itemListElement : [];
+      }
+
+      if (services.length > 0) {
         const title = document.createElement('div');
         title.innerHTML = '<strong>Skilled in:</strong>';
         servicesDiv.appendChild(title);
@@ -711,6 +844,9 @@
           span.textContent = typeof s === 'string' ? s : (s.name || s['@type']);
           servicesDiv.appendChild(span);
         });
+
+        // Also render in the "Other Services" section at the bottom
+        renderOtherServices(services);
       }
 
       // Distance placeholder
