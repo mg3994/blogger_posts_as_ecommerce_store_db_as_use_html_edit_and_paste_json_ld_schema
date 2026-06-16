@@ -53,6 +53,22 @@
       gap: 20px;
     }
 
+    .section-title {
+      font-size: 1.5rem;
+      margin: 30px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent-color);
+      display: inline-block;
+    }
+
+    .featured-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 40px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
     .product-card {
       background: var(--card-bg);
       border-radius: var(--border-radius);
@@ -258,6 +274,11 @@
     <b:section id='main' showaddelement='yes'>
       <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
         <b:includable id='main' var='top'>
+          <b:if cond='data:view.isHomepage'>
+            <b:include name='featuredSection'/>
+            <h2 class='section-title'>Latest Products</h2>
+          </b:if>
+
           <b:if cond='data:view.isMultipleItems'>
             <div class='product-grid'>
               <b:loop values='data:posts' var='post'>
@@ -347,6 +368,21 @@
           </div>
         </b:includable>
 
+        <b:includable id='featuredSection'>
+          <b:if cond='data:posts any (p => p.labels any (l => l.name == "featured" or l.name == "popular"))'>
+            <h2 class='section-title'>Featured Products</h2>
+            <div class='featured-container'>
+              <div class='product-grid'>
+                <b:loop values='data:posts' var='post'>
+                  <b:if cond='data:post.labels any (l => l.name == "featured" or l.name == "popular")'>
+                    <b:include data='post' name='postCard'/>
+                  </b:if>
+                </b:loop>
+              </div>
+            </div>
+          </b:if>
+        </b:includable>
+
         <b:includable id='nextprev'>
           <div class='blog-pager' id='blog-pager' style='margin-top:40px; text-align:center;'>
             <b:if cond='data:newerPageUrl'>
@@ -374,16 +410,24 @@
 
     function initProductPage() {
       const source = document.getElementById('json-ld-source');
+      if (!source) return;
+
       const scripts = source.querySelectorAll('script[type="application/ld+json"]');
 
       scripts.forEach(script => {
         try {
-          const data = JSON.parse(script.textContent);
+          const text = script.textContent.trim();
+          if (!text) return;
+          const data = JSON.parse(text);
           if (data['@type'] === 'ProductGroup') {
             productData = data;
           }
         } catch (e) {
-          console.error("Failed to parse JSON-LD", e);
+          console.error("Failed to parse JSON-LD. Please check if the JSON is valid.", e);
+          const errorMsg = document.createElement('div');
+          errorMsg.style.color = 'red';
+          errorMsg.textContent = "Error loading product data. Invalid JSON-LD format.";
+          document.querySelector('.product-details').prepend(errorMsg);
         }
       });
 
@@ -391,6 +435,8 @@
         renderProductInfo();
         renderSelectors();
         updateDisplay();
+      } else {
+        console.warn("No ProductGroup found in JSON-LD");
       }
     }
 
@@ -407,12 +453,13 @@
 
     function renderSelectors() {
       const selectorContainer = document.getElementById('variant-selectors');
+      if (!selectorContainer) return;
       selectorContainer.innerHTML = '';
 
       if (!productData.variesBy || !productData.hasVariant) return;
 
       productData.variesBy.forEach(attrUrl => {
-        const attr = attrUrl.split('/').pop(); // e.g., 'color'
+        const attr = attrUrl.split(/[\/#]/).pop(); // Handle both / and # in schema URLs
         const values = [...new Set(productData.hasVariant.map(v => v[attr]).filter(Boolean))];
 
         if (values.length > 0) {
