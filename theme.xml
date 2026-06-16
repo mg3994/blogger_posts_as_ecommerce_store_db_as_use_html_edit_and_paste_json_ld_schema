@@ -47,6 +47,33 @@
       margin: 0 auto;
       padding: 0 20px;
     }
+
+    .cat-bar {
+      background: #fff;
+      border-top: 1px solid #eee;
+      padding: 10px 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .cat-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      gap: 15px;
+    }
+    .cat-link {
+      text-decoration: none;
+      color: #666;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: #f0f0f0;
+      transition: all 0.2s;
+    }
+    .cat-link:hover { background: var(--accent); color: #fff; }
     .brand {
       font-size: 1.5rem;
       font-weight: 800;
@@ -201,6 +228,24 @@
     </div>
   </nav>
 
+  <b:if cond='data:view.isMultipleItems'>
+    <div class='cat-bar'>
+      <div class='cat-inner'>
+        <a class='cat-link' expr:href='data:blog.homepageUrl'>All</a>
+        <!-- This requires a Label widget to be present or we can hardcode common ones -->
+        <b:section id='category-section' showaddelement='no'>
+          <b:widget id='Label1' locked='true' title='Categories' type='Label'>
+            <b:includable id='main'>
+              <b:loop values='data:results' var='label'>
+                <a class='cat-link' expr:href='data:label.url'><data:label.name/></a>
+              </b:loop>
+            </b:includable>
+          </b:widget>
+        </b:section>
+      </div>
+    </div>
+  </b:if>
+
   <div class='container'>
     <b:section id='main-section' showaddelement='yes'>
       <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
@@ -348,7 +393,21 @@
           const variants = data.hasVariant || [];
           if (variants.length > 0) {
             const first = variants[0];
-            if (first.offers) price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
+            if (first.offers) {
+              price.textContent = (first.offers.priceCurrency || '') + ' ' + (first.offers.price || '');
+
+              // Dual-Type Detection: Check if seller offers services
+              const seller = first.offers.seller;
+              if (seller && (seller.knowsAbout || seller.hasOfferCatalog)) {
+                const sBadge = document.createElement('div');
+                sBadge.className = 'card-badge';
+                sBadge.style.background = '#3498db';
+                sBadge.style.color = '#fff';
+                sBadge.style.marginLeft = '5px';
+                sBadge.textContent = 'Service';
+                badge.after(sBadge);
+              }
+            }
             const imageSource = first.image || data.image || (variants.find(v => v.image)?.image);
             if (imageSource) img.src = Array.isArray(imageSource) ? imageSource[0] : (imageSource.url || imageSource);
           }
