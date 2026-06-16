@@ -378,8 +378,11 @@
                        <div class='seller-box' id='p-seller'>
                           <h4 style='margin:0 0 10px;'>Seller Details</h4>
                           <div id='seller-info'></div>
-                          <div class='geo-badge' id='geo-info'>
-                             &#128205; <span id='geo-text'>GEO Points Present</span>
+                          <div style='display:flex; align-items:center; gap:10px; flex-wrap:wrap;'>
+                             <div class='geo-badge' id='geo-info'>
+                                &#128205; <span id='geo-text'>GEO Points Present</span>
+                             </div>
+                             <a class='social-link' id='maps-link' style='background:#34495e; display:none;' target='_blank'>Open in Maps</a>
                           </div>
                        </div>
                     </div>
@@ -658,7 +661,7 @@
             }
             btn.onclick = () => {
               state.selected[attr] = val;
-              updateProductView();
+              updateProductView(attr);
               checkAvailability();
             };
             opts.appendChild(btn);
@@ -680,20 +683,25 @@
         const attr = btn.dataset.attr;
         const val = btn.dataset.val;
 
-        // Temporarily simulate selecting this button
-        const testSelected = { ...state.selected, [attr]: val };
+        // A button is always "possible" if ANY variant has this value.
+        // This prevents deadlocks in mutually exclusive attribute sets.
+        const globalPossible = p.hasVariant.some(v => v[attr] === val);
 
-        // Check if any variant matches this simulated selection AND is in stock
+        // Check if it's compatible with CURRENT selection (excluding itself)
+        const testSelected = { ...state.selected, [attr]: val };
         const matchingVariant = p.hasVariant.find(v =>
           Object.entries(testSelected).every(([k, vVal]) => !v[k] || v[k] === vVal)
         );
 
-        const possible = !!matchingVariant;
         const outOfStock = matchingVariant && matchingVariant.offers && matchingVariant.offers.availability === 'https://schema.org/OutOfStock';
 
-        btn.disabled = !possible;
-        btn.style.opacity = outOfStock ? '0.5' : (possible ? '1' : '0.3');
+        btn.disabled = !globalPossible;
+        // Visual cue for incompatible but selectable: dashed border or lower opacity
+        btn.style.opacity = !matchingVariant ? '0.4' : (outOfStock ? '0.6' : '1');
+        btn.style.borderStyle = !matchingVariant ? 'dashed' : 'solid';
+
         if (outOfStock) btn.title = val + ' (Out of Stock)';
+        else btn.title = val;
       });
     }
 
@@ -704,13 +712,25 @@
       return v.value || '';
     }
 
-    function updateProductView() {
+    function updateProductView(pivotAttr) {
       const p = state.product;
       if (!p.hasVariant || p.hasVariant.length === 0) return;
 
-      const variant = p.hasVariant.find(v =>
+      let variant = p.hasVariant.find(v =>
         Object.entries(state.selected).every(([key, val]) => v[key] === val)
-      ) || p.hasVariant[0];
+      );
+
+      // If no perfect match, pivot based on the last clicked attribute
+      if (!variant) {
+         variant = p.hasVariant.find(v => v[pivotAttr] === state.selected[pivotAttr]) || p.hasVariant[0];
+         // Sync selected state to this new variant
+         if (p.variesBy) {
+           p.variesBy.forEach(vUrl => {
+             const attr = vUrl.split(/[\/#]/).pop();
+             if (variant[attr]) state.selected[attr] = variant[attr];
+           });
+         }
+      }
 
       if (variant.offers) {
         const priceEl = document.getElementById('p-price');
@@ -907,11 +927,19 @@
 
       info.innerHTML = contactHtml;
 
-      if (seller.geo) {
+      if (seller.geo && seller.geo.latitude && seller.geo.longitude) {
         document.getElementById('geo-info').style.display = 'inline-flex';
-        document.getElementById('geo-text').textContent = (seller.geo.latitude || '') + ', ' + (seller.geo.longitude || '');
+        document.getElementById('geo-text').textContent = seller.geo.latitude + ', ' + seller.geo.longitude;
+
+        const mapsLink = document.getElementById('maps-link');
+        if (mapsLink) {
+          mapsLink.href = `geo:${seller.geo.latitude},${seller.geo.longitude}`;
+          mapsLink.style.display = 'inline-block';
+        }
       } else {
         document.getElementById('geo-info').style.display = 'none';
+        const mapsLink = document.getElementById('maps-link');
+        if (mapsLink) mapsLink.style.display = 'none';
       }
 
       // Handle "Other Services"
