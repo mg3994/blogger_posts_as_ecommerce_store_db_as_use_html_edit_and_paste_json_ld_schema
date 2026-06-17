@@ -73,7 +73,7 @@
       background: #f0f0f0;
       transition: all 0.2s;
     }
-    .cat-link:hover { background: var(--accent); color: #fff; }
+    .cat-link:hover, .cat-link.active { background: var(--accent); color: #fff; }
     .brand {
       font-size: 1.5rem;
       font-weight: 800;
@@ -277,9 +277,9 @@
         <b:if cond='data:view.isMultipleItems'>
           <div class='cat-bar'>
             <div class='cat-inner'>
-              <a class='cat-link' expr:href='data:blog.homepageUrl'>All</a>
+              <a expr:class='data:view.isHomepage ? &quot;cat-link active&quot; : &quot;cat-link&quot;' expr:href='data:blog.homepageUrl'>All</a>
               <b:loop values='data:labels' var='label'>
-                <a class='cat-link' expr:href='data:label.url'><data:label.name/></a>
+                <a expr:class='data:view.search.label == data:label.name ? &quot;cat-link active&quot; : &quot;cat-link&quot;' expr:href='data:label.url'><data:label.name/></a>
               </b:loop>
             </div>
           </div>
@@ -516,7 +516,7 @@
             sBadge.style.background = '#3498db';
             sBadge.style.color = '#fff';
             sBadge.style.marginLeft = '5px';
-            sBadge.textContent = '(Also provide Services)';
+            sBadge.textContent = '(* Optional Product Related Seller Service Paid Add-Ons available kind stuff)';
             badge.after(sBadge);
           }
         }
