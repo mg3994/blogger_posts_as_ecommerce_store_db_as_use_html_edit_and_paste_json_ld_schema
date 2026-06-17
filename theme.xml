@@ -248,6 +248,8 @@
     .stock-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-left: 10px; }
     .in-stock { background: #e8f5e9; color: #2e7d32; }
     .out-stock { background: #ffebee; color: #c62828; }
+    .instore-only { background: #fffde7; color: #fbc02d; }
+    .pre-order { background: #e3f2fd; color: #1976d2; }
     .section-title { font-size: 1.3rem; margin: 30px 0 15px; border-left: 5px solid var(--accent); padding-left: 15px; }
     .hidden { display: none !important; }
 
@@ -373,8 +375,13 @@
 
                        <div class='variants' id='p-variants'></div>
 
+                       <div id='p-order-info' style='margin-top:20px; padding:15px; background:#f9f9f9; border-radius:8px; display:none;'>
+                          <h4 style='margin:0 0 10px;'>Order & Delivery Information</h4>
+                          <div id='order-info-list' style='font-size:0.85rem; line-height:1.8;'></div>
+                       </div>
+
                        <div id='p-specs' style='margin-top:20px; display:none;'>
-                          <h4 style='margin:0 0 10px; border-bottom:1px solid #eee; padding-bottom:5px;'>Technical Specifications</h4>
+                          <h4 style='margin:0 0 10px; border-bottom:1px solid #eee; padding-bottom:5px;'>Product Specifications</h4>
                           <div id='specs-list' style='font-size:0.9rem;'></div>
                        </div>
 
@@ -741,14 +748,13 @@
       if (skuEl) skuEl.textContent = variant.sku ? 'SKU: ' + variant.sku : '';
 
       if (variant.offers) {
+        const off = variant.offers;
         const priceEl = document.getElementById('p-price');
-        priceEl.textContent = (variant.offers.priceCurrency || '') + ' ' + (variant.offers.price || '');
+        priceEl.textContent = (off.priceCurrency || '') + ' ' + (off.price || '');
 
-        // Stock Logic
-        const isOut = variant.offers.availability === 'https://schema.org/OutOfStock';
-        priceEl.classList.toggle('blurry', isOut);
+        // Advanced Availability Logic
+        priceEl.classList.toggle('blurry', off.availability === 'https://schema.org/OutOfStock');
 
-        // Add/Update Stock Badge
         let badge = document.getElementById('stock-indicator');
         if (!badge) {
           badge = document.createElement('span');
@@ -756,10 +762,50 @@
           badge.className = 'stock-badge';
           priceEl.after(badge);
         }
-        badge.textContent = isOut ? 'Out of Stock' : 'In Stock';
-        badge.className = 'stock-badge ' + (isOut ? 'out-stock' : 'in-stock');
 
-        renderSeller(variant.offers.seller);
+        let av = off.availability;
+        if (av === 'https://schema.org/InStock') {
+          badge.textContent = 'In Stock';
+          badge.className = 'stock-badge in-stock';
+        } else if (av === 'https://schema.org/OutOfStock') {
+          badge.textContent = 'Out of Stock';
+          badge.className = 'stock-badge out-stock';
+        } else if (av === 'https://schema.org/InStoreOnly') {
+          badge.textContent = 'In-Store Only';
+          badge.className = 'stock-badge instore-only';
+        } else if (av === 'https://schema.org/PreOrder') {
+          badge.textContent = 'Pre-Order';
+          if (off.availabilityStarts) badge.textContent += ' (from ' + off.availabilityStarts.split('T')[0] + ')';
+          badge.className = 'stock-badge pre-order';
+        }
+
+        // Order Info Section
+        const orderSection = document.getElementById('p-order-info');
+        const orderList = document.getElementById('order-info-list');
+        let orderHtml = '';
+
+        if (off.deliveryLeadTime) orderHtml += `<div>&#128666; <b>Delivery:</b> ~${formatValue(off.deliveryLeadTime)}</div>`;
+        if (off.eligibleQuantity && off.eligibleQuantity.minValue) orderHtml += `<div>&#128230; <b>Min Order:</b> ${off.eligibleQuantity.minValue} units</div>`;
+        if (off.acceptedPaymentMethod) {
+          const payments = Array.isArray(off.acceptedPaymentMethod) ? off.acceptedPaymentMethod : [off.acceptedPaymentMethod];
+          orderHtml += `<div>&#128179; <b>Payments:</b> ${payments.map(p => p.split('/').pop()).join(', ')}</div>`;
+        }
+        if (off.availableDeliveryMethod) orderHtml += `<div>&#128230; <b>Method:</b> ${off.availableDeliveryMethod.split('/').pop()}</div>`;
+
+        if (orderHtml) {
+          orderSection.style.display = 'block';
+          orderList.innerHTML = orderHtml;
+        } else {
+          orderSection.style.display = 'none';
+        }
+
+        // Resolve Seller
+        let seller = off.seller;
+        // Handle @id references and availableAtOrFromPlace
+        if (seller && seller['@id'] && off.availableAtOrFromPlace && off.availableAtOrFromPlace['@id'] === seller['@id']) {
+           seller = off.availableAtOrFromPlace;
+        }
+        renderSeller(seller);
       }
 
       // Single view: Prioritize Variant images as requested. Fallback to group images only if variant has none.
@@ -775,6 +821,9 @@
       const fields = {
         'Model': variant.model || p.model,
         'Material': variant.material || p.material,
+        'Condition': (variant.itemCondition || variant.offers?.itemCondition)?.split('/').pop() || '',
+        'GTIN': variant.gtin13 || variant.gtin8 || '',
+        'MPN': variant.mpn || '',
         'Weight': formatValue(variant.weight || p.weight),
         'Height': formatValue(variant.height || p.height),
         'Width': formatValue(variant.width || p.width),
