@@ -800,12 +800,7 @@
         }
 
         // Resolve Seller
-        let seller = off.seller;
-        // Handle @id references and availableAtOrFromPlace
-        if (seller && seller['@id'] && off.availableAtOrFromPlace && off.availableAtOrFromPlace['@id'] === seller['@id']) {
-           seller = off.availableAtOrFromPlace;
-        }
-        renderSeller(seller);
+        renderSeller(off.seller);
       }
 
       // Single view: Prioritize Variant images as requested. Fallback to group images only if variant has none.
