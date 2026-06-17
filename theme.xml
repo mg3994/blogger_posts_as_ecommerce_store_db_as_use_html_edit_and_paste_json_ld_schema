@@ -339,13 +339,15 @@
             <b:loop values='data:posts' var='post'>
               <div id='app-item'>
                  <div class='breadcrumb' style='margin-bottom:20px; font-size:0.9rem;'>
-                   <a expr:href='data:blog.homepageUrl'>Home</a>
+                   <a expr:href='data:blog.homepageUrl'>Home</a> /
                    <b:if cond='data:post.labels'>
-                     <b:loop values='data:post.labels' var='label'>
-                       , <a expr:href='data:label.url'><data:label.name/></a>
+                     <b:loop index='i' values='data:post.labels' var='label'>
+                       <a expr:href='data:label.url'><data:label.name/></a>
+                       <b:if cond='data:i &lt; data:post.labels.size - 1'>, </b:if>
                      </b:loop>
+                     /
                    </b:if>
-                   / <data:post.title/>
+                   <data:post.title/>
                  </div>
 
                  <div class='product-layout' id='main-renderer' style='min-height: 400px;'>
@@ -390,7 +392,7 @@
                  </div>
 
                  <div id='other-services' style='margin-top:50px; display:none;'>
-                    <h2 style='margin-bottom:20px;'>Other Services Offered</h2>
+                    <h2 style='margin-bottom:20px;'>Optional Product-Related Services <small>(Additional Charges May Apply)</small></h2>
                     <div class='h-scroll' id='other-services-list'></div>
                  </div>
               </div>
