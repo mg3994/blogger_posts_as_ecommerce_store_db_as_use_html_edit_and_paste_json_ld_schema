@@ -929,11 +929,14 @@
 
       if (seller.geo && seller.geo.latitude && seller.geo.longitude) {
         document.getElementById('geo-info').style.display = 'inline-flex';
-        document.getElementById('geo-text').textContent = seller.geo.latitude + ', ' + seller.geo.longitude;
+        const lat = seller.geo.latitude;
+        const lon = seller.geo.longitude;
+        document.getElementById('geo-text').textContent = lat + ', ' + lon;
 
         const mapsLink = document.getElementById('maps-link');
         if (mapsLink) {
-          mapsLink.href = `geo:${seller.geo.latitude},${seller.geo.longitude}`;
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          mapsLink.href = isMobile ? `geo:${lat},${lon}` : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
           mapsLink.style.display = 'inline-block';
         }
       } else {
