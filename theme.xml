@@ -365,6 +365,7 @@
 
                     <div class='details-container hidden' id='details-section'>
                        <h1 id='p-name'><data:post.title/></h1>
+                       <div id='p-sku' style='font-size:0.75rem; color:#888; margin-bottom:10px;'></div>
                        <div class='price' id='p-price'>--</div>
                        <p id='p-desc' style='color:#666;'></p>
 
@@ -731,6 +732,10 @@
            });
          }
       }
+
+      // Display SKU
+      const skuEl = document.getElementById('p-sku');
+      if (skuEl) skuEl.textContent = variant.sku ? 'SKU: ' + variant.sku : '';
 
       if (variant.offers) {
         const priceEl = document.getElementById('p-price');
