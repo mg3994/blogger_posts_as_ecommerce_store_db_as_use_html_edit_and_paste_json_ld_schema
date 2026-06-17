@@ -520,7 +520,8 @@
             badge.after(sBadge);
           }
         }
-        const imageSource = first.image || data.image || (data.hasVariant && data.hasVariant.find(v => v.image)?.image);
+        // Prioritize ProductGroup images for Grid/Homepage view as requested
+        const imageSource = data.image || first.image || (data.hasVariant && data.hasVariant.find(v => v.image)?.image);
         if (imageSource) img.src = Array.isArray(imageSource) ? imageSource[0] : (imageSource.url || imageSource);
 
       } else if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Service') {
@@ -759,10 +760,10 @@
         renderSeller(variant.offers.seller);
       }
 
-      // Multi-Image Merge Logic: Show variant images first, then group images
+      // Single view: Prioritize Variant images as requested. Fallback to group images only if variant has none.
       let vImgs = Array.isArray(variant.image) ? variant.image : (variant.image ? [variant.image] : []);
       let pImgs = Array.isArray(p.image) ? p.image : (p.image ? [p.image] : []);
-      let allImgs = [...new Set([...vImgs, ...pImgs])];
+      let allImgs = vImgs.length > 0 ? vImgs : pImgs;
 
       renderCarousel(allImgs);
 
